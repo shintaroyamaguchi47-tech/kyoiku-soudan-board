@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>教育相談 日程調整ボード v9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3efe6;
+  --surface:#fffdf8;
+  --surface-2:#f8f4ea;
+  --ink:#232a26;
+  --muted:#6d7871;
+  --board:#274b40;         /* 黒板グリーン */
+  --board-deep:#1c382f;
+  --accent:#c06a2f;        /* チョーク下のオレンジ・アクセント */
+  --accent-weak:color-mix(in oklab, var(--accent) 14%, var(--surface));
+  --good:#3f7d5a;
+  --warn:#c0392b;
+  --warn-weak:color-mix(in oklab, var(--warn) 12%, var(--surface));
+  --line:color-mix(in oklab, var(--ink) 14%, transparent);
+  --line-soft:color-mix(in oklab, var(--ink) 8%, transparent);
+  --chalk:#eef3ee;
+  --radius:14px;
+  --radius-sm:9px;
+  --shadow:0 1px 2px rgba(28,40,34,.05), 0 12px 30px -16px rgba(28,40,34,.30);
+  --shadow-sm:0 1px 2px rgba(28,40,34,.06), 0 4px 12px -8px rgba(28,40,34,.22);
+  --step-0:clamp(.9rem,.86rem+.2vw,1rem);
+  --step-1:clamp(1.05rem,.98rem+.35vw,1.25rem);
+  --step-2:clamp(1.35rem,1.15rem+.9vw,1.9rem);
+  --space:clamp(1rem,.8rem+1vw,1.5rem);
+  --disp:"BIZ UDGothic","BIZ UDPGothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+  --body:"BIZ UDPGothic","BIZ UDGothic","Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);
+  font-size:var(--step-0);line-height:1.7;
+  background-image:radial-gradient(circle at 12% -5%, color-mix(in oklab,var(--board) 8%,transparent), transparent 42%);
+}
+h1,h2,h3{font-family:var(--disp);font-weight:700;line-height:1.3;letter-spacing:.01em;margin:0}
+button{font-family:var(--body);cursor:pointer}
+input,select,textarea{font-family:var(--body);font-size:.95rem;color:var(--ink)}
+a{color:var(--board)}
+
+/* ---------- header / board ---------- */
+.topbar{
+  background:linear-gradient(160deg,var(--board),var(--board-deep));
+  color:var(--chalk);padding:calc(var(--space)*1.1) var(--space);
+  border-bottom:5px solid #a9814f;
+  box-shadow:inset 0 0 60px rgba(0,0,0,.18);
+}
+.topbar-inner{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:flex-end;gap:.6rem 1.2rem}
+.brand{display:flex;align-items:center;gap:.7rem}
+.chalkmark{font-family:var(--disp);font-weight:900;font-size:1.5rem;color:#fff;
+  border:2px dashed rgba(238,243,238,.6);border-radius:12px;padding:.15rem .55rem;line-height:1}
+.topbar h1{font-size:var(--step-2);color:#fff}
+.topbar .sub{color:rgba(238,243,238,.82);font-size:.85rem;margin-top:.15rem}
+.topbar .meta-live{margin-left:auto;text-align:right;font-size:.82rem;color:rgba(238,243,238,.85)}
+.topbar .meta-live b{color:#fff;font-weight:700}
+
+/* ---------- tabs ---------- */
+.tabs{max-width:1180px;margin:0 auto;padding:0 var(--space);display:flex;gap:.4rem;flex-wrap:wrap;
+  position:sticky;top:0;z-index:20;background:var(--bg);
+  padding-top:.7rem;padding-bottom:.7rem;border-bottom:1px solid var(--line-soft)}
+.tab{border:1px solid var(--line);background:var(--surface);color:var(--muted);
+  padding:.5rem 1rem;border-radius:999px;font-weight:700;font-size:.9rem;transition:.15s}
+.tab .n{display:inline-flex;width:1.35rem;height:1.35rem;align-items:center;justify-content:center;
+  background:var(--surface-2);border-radius:50%;font-size:.75rem;margin-right:.45rem;color:var(--muted)}
+.tab:hover{border-color:var(--board);color:var(--ink)}
+.tab.active{background:var(--board);color:#fff;border-color:var(--board);box-shadow:var(--shadow-sm)}
+.tab.active .n{background:rgba(255,255,255,.22);color:#fff}
+
+main{max-width:1180px;margin:0 auto;padding:var(--space)}
+.panel{display:none;animation:fade .25s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);padding:calc(var(--space)*.95);margin-bottom:var(--space)}
+.card > h2{font-size:var(--step-1);display:flex;align-items:center;gap:.55rem;margin-bottom:.2rem}
+.card > h2::before{content:"";width:.55rem;height:1.35rem;border-radius:3px;background:var(--accent)}
+.card .lead{color:var(--muted);font-size:.88rem;margin:.15rem 0 1rem}
+
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:.82rem;color:var(--muted);font-weight:700}
+.field input,.field select,.field textarea{
+  border:1px solid var(--line);border-radius:var(--radius-sm);padding:.5rem .6rem;background:var(--surface-2);
+  font-weight:400;color:var(--ink)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--board);outline-offset:1px;background:#fff}
+.grid{display:grid;gap:.8rem}
+.grid.cols{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+
+.btn{border:1px solid var(--board);background:var(--board);color:#fff;padding:.5rem .95rem;border-radius:var(--radius-sm);
+  font-weight:700;font-size:.88rem;transition:.15s;display:inline-flex;align-items:center;gap:.4rem}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.ghost{background:var(--surface);color:var(--board)}
+.btn.accent{background:var(--accent);border-color:var(--accent)}
+.btn.sm{padding:.32rem .6rem;font-size:.8rem}
+.btn.danger{background:var(--surface);color:var(--warn);border-color:color-mix(in oklab,var(--warn) 45%,transparent)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.toolbar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.9rem}
+.toolbar .spacer{flex:1}
+
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{border:1px solid var(--line-soft);padding:.4rem .5rem;text-align:left;vertical-align:middle}
+thead th{background:var(--surface-2);font-weight:700;color:var(--muted);font-size:.78rem;letter-spacing:.02em}
+tbody tr:nth-child(even){background:color-mix(in oklab,var(--surface-2) 55%,transparent)}
+td input,td select{width:100%;border:1px solid transparent;background:transparent;border-radius:6px;padding:.3rem}
+td input:hover,td select:hover{border-color:var(--line)}
+td input:focus,td select:focus{border-color:var(--board);background:#fff;outline:none}
+.num{width:3.2rem;text-align:center}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line-soft);border-radius:var(--radius-sm)}
+
+.chip{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;font-weight:700;
+  padding:.12rem .5rem;border-radius:999px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line-soft)}
+.chip.ok{background:color-mix(in oklab,var(--good) 14%,var(--surface));color:var(--good);border-color:transparent}
+.chip.bad{background:var(--warn-weak);color:var(--warn);border-color:transparent}
+.chip.wait{background:var(--accent-weak);color:var(--accent);border-color:transparent}
+
+/* day / slot editor */
+.day-block{border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:.8rem;overflow:hidden}
+.day-head{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;background:var(--surface-2);padding:.55rem .7rem}
+.day-head .dlabel{font-family:var(--disp);font-weight:700;font-size:1rem}
+.day-head .dlabel .wd{color:var(--accent);margin-left:.15rem}
+.slot-row{display:flex;flex-wrap:wrap;gap:.4rem;padding:.6rem .7rem}
+.slot-pill{display:inline-flex;align-items:center;gap:.4rem;background:var(--surface);border:1px solid var(--line);
+  border-radius:999px;padding:.28rem .3rem .28rem .7rem;font-size:.82rem;font-weight:700}
+.slot-pill .x{border:none;background:transparent;color:var(--warn);font-weight:900;font-size:1rem;line-height:1;padding:0 .25rem;border-radius:50%}
+.slot-pill .x:hover{background:var(--warn-weak)}
+
+/* schedule grid */
+.sgrid th,.sgrid td{text-align:center}
+.sgrid .tcol{white-space:nowrap;font-weight:700;background:var(--surface-2);color:var(--muted);font-size:.8rem}
+.sgrid .cell{min-width:120px;height:44px;cursor:default}
+.sgrid .cell.filled{background:color-mix(in oklab,var(--good) 12%,var(--surface));font-weight:700}
+.sgrid .cell.conflict{background:var(--warn-weak);color:var(--warn);font-weight:700}
+.sgrid .cell.empty{color:color-mix(in oklab,var(--muted) 60%,transparent)}
+
+/* notify cards */
+.slips{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.slip{border:2px dashed var(--line);border-radius:12px;padding:14px 16px;background:#fff;position:relative}
+.slip .cut{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--bg);color:var(--muted);
+  font-size:.66rem;padding:0 .4rem}
+.slip h3{font-size:1rem;margin-bottom:.2rem}
+.slip .school{font-size:.72rem;color:var(--muted)}
+.slip .big{font-family:var(--disp);font-weight:900;font-size:1.35rem;color:var(--board);margin:.4rem 0 .1rem}
+.slip .rowline{font-size:.82rem;margin:.15rem 0}
+.slip .rowline b{display:inline-block;min-width:3.4em;color:var(--muted);font-weight:700}
+.slip .note{font-size:.75rem;color:var(--muted);margin-top:.4rem;border-top:1px dotted var(--line);padding-top:.35rem}
+
+.empty-state{text-align:center;color:var(--muted);padding:2rem 1rem;font-size:.9rem}
+.hint{font-size:.8rem;color:var(--muted);background:var(--surface-2);border-left:3px solid var(--accent);
+  padding:.55rem .75rem;border-radius:0 8px 8px 0;margin:.6rem 0}
+
+.print-headline{font-family:var(--disp);font-weight:700;font-size:1.2rem;margin:0 0 .6rem;color:var(--ink)}
+.print-subline{font-size:.82rem;color:var(--muted);margin:0 0 .8rem}
+.privacy-note{font-size:.78rem;color:var(--muted);background:var(--accent-weak);border:1px solid color-mix(in oklab,var(--accent) 18%,transparent);border-radius:999px;padding:.18rem .6rem;display:inline-flex;align-items:center;gap:.35rem}
+
+/* roster assignment builder */
+.builder{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:var(--space);align-items:start}
+.roster-panel{border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--surface-2);padding:.75rem;position:sticky;top:72px}
+.roster-panel h3,.builder-panel h3{font-family:var(--disp);font-size:1rem;margin:0 0 .45rem;color:var(--ink)}
+.roster-search{width:100%;border:1px solid var(--line);border-radius:var(--radius-sm);padding:.45rem .55rem;background:#fff;margin:.35rem 0 .55rem}
+.roster-list{display:flex;flex-direction:column;gap:.35rem;max-height:420px;overflow:auto;padding-right:.15rem}
+.roster-card{display:flex;align-items:center;gap:.5rem;background:#fff;border:1px solid var(--line);border-radius:10px;padding:.42rem .5rem;font-weight:700;box-shadow:0 1px 2px rgba(28,40,34,.04);user-select:none}
+.roster-card[draggable="true"]{cursor:grab}
+.roster-card.assigned{opacity:.48;background:color-mix(in oklab,var(--good) 8%,#fff)}
+.roster-card .badge{display:inline-flex;align-items:center;justify-content:center;min-width:2.2rem;height:1.55rem;border-radius:999px;background:var(--board);color:#fff;font-size:.78rem}
+.roster-card .rname{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.builder-panel{min-width:0}
+.drop-hint{font-size:.78rem;color:var(--muted);margin:.25rem 0 .65rem}
+.sgrid .cell.dropzone{position:relative;transition:.12s;border:2px solid transparent;min-width:150px;padding:.3rem}
+.sgrid .cell.dropzone:hover{border-color:color-mix(in oklab,var(--board) 45%,transparent);background:color-mix(in oklab,var(--board) 6%,var(--surface))}
+.sgrid .cell.dropzone.drag-over{border-color:var(--accent);background:var(--accent-weak);box-shadow:inset 0 0 0 2px color-mix(in oklab,var(--accent) 22%,transparent)}
+.sgrid .cell .slot-input{width:3.6rem;text-align:center;border:1px solid var(--line);border-radius:8px;background:#fff;padding:.28rem .35rem;font-weight:700;font-size:.82rem}
+.sgrid .cell .slot-input:focus{outline:2px solid var(--board);outline-offset:1px}
+.sgrid .cell .cell-person{display:block;margin-top:.24rem;font-weight:700;font-size:.82rem;line-height:1.35}
+.sgrid .cell .cell-sub{display:block;color:var(--muted);font-size:.7rem;font-weight:700;margin-top:.12rem}
+.sgrid .cell .clear-cell{position:absolute;top:2px;right:3px;border:none;background:transparent;color:var(--warn);font-weight:900;border-radius:50%;line-height:1;padding:.1rem .28rem}
+.sgrid .cell .clear-cell:hover{background:var(--warn-weak)}
+.sgrid .cell.conflict .slot-input{border-color:var(--warn);color:var(--warn)}
+.quick-tools{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;margin:.65rem 0}
+@media(max-width:820px){.builder{grid-template-columns:1fr}.roster-panel{position:static}.roster-list{max-height:220px}}
+@media print{.builder{display:block}.roster-panel,.quick-tools,.drop-hint{display:none!important}.builder-panel{width:100%}.sgrid .cell .slot-input{display:none}.sgrid .cell.dropzone{border:1px solid var(--line-soft);min-width:0}.sgrid .cell .clear-cell{display:none}}
+
+.ng-days{display:flex;flex-wrap:wrap;gap:.28rem;min-width:220px}
+.ng-btn{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:.22rem .48rem;font-size:.74rem;font-weight:700;line-height:1.2}
+.ng-btn.active{background:var(--warn-weak);color:var(--warn);border-color:color-mix(in oklab,var(--warn) 40%,transparent)}
+.ng-btn:focus-visible{outline:2px solid var(--board);outline-offset:1px}
+.note-cell{min-width:220px}
+.note-badge{display:inline-flex;align-items:center;justify-content:center;min-width:1.5rem;height:1.5rem;border-radius:999px;background:var(--accent-weak);color:var(--accent);font-size:.72rem;font-weight:900;margin-left:.25rem}
+.sgrid .cell.ng{background:var(--warn-weak);color:var(--warn);font-weight:700}
+.sgrid .cell.ng .slot-input{border-color:var(--warn);color:var(--warn)}
+.sgrid .cell .cell-note{display:block;margin-top:.18rem;color:var(--accent);font-size:.68rem;font-weight:900}
+.quick-preset{background:linear-gradient(135deg,var(--board),var(--board-deep));color:#fff;border-color:var(--board)}
+@media print{.ng-btn{border:none;background:transparent;padding:0}.ng-btn:not(.active){display:none}.note-badge{display:none}}
+
+.bulk-box{border:1px solid var(--line);border-radius:var(--radius-sm);background:linear-gradient(180deg,#fff,var(--surface-2));padding:.85rem;margin:.7rem 0 1rem}
+.bulk-box h3{font-family:var(--disp);font-size:1rem;margin:0 0 .45rem;color:var(--ink)}
+.checkline{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;color:var(--muted);font-weight:700}
+.import-box{border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--surface-2);padding:.85rem;margin-bottom:1rem}
+.import-box textarea{width:100%;min-height:7.5rem;resize:vertical;border:1px solid var(--line);border-radius:var(--radius-sm);padding:.55rem;background:#fff;line-height:1.6}
+.import-preview{font-size:.8rem;color:var(--muted);margin-top:.45rem}
+.unavail-summary{display:flex;flex-wrap:wrap;gap:.25rem;align-items:center;min-width:260px}
+.unavail-chip{display:inline-flex;align-items:center;gap:.2rem;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:.12rem .45rem;font-size:.72rem;font-weight:700}
+.unavail-chip.bad{background:var(--warn-weak);color:var(--warn);border-color:color-mix(in oklab,var(--warn) 35%,transparent)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(20,28,24,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-backdrop.active{display:flex}
+.modal{width:min(100%,980px);max-height:88vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 80px -30px rgba(0,0,0,.45);padding:1rem}
+.modal-head{display:flex;align-items:flex-start;gap:1rem;border-bottom:1px solid var(--line-soft);padding-bottom:.7rem;margin-bottom:.8rem}
+.modal-head h2{font-size:var(--step-1)}
+.modal-head .spacer{flex:1}
+.unavail-grid{overflow:auto;border:1px solid var(--line-soft);border-radius:var(--radius-sm)}
+.unavail-grid table{font-size:.8rem;background:#fff}
+.unavail-grid th{position:sticky;top:0;z-index:1;background:var(--surface-2);text-align:center}
+.unavail-grid td{text-align:center;min-width:96px}
+.unavail-grid .timehead{position:sticky;left:0;background:var(--surface-2);z-index:2;font-weight:700;color:var(--muted)}
+.unavail-toggle{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.28rem .45rem;font-size:.74rem;font-weight:900;min-width:3rem;color:var(--muted)}
+.unavail-toggle.active{background:var(--warn-weak);border-color:color-mix(in oklab,var(--warn) 45%,transparent);color:var(--warn)}
+.unavail-tools{display:flex;gap:.4rem;flex-wrap:wrap;margin:.55rem 0}
+.file-label{position:relative;overflow:hidden}
+.file-label input{position:absolute;inset:0;opacity:0;cursor:pointer}
+@media(max-width:760px){.modal{padding:.8rem}.unavail-grid td{min-width:82px}.bulk-box .grid.cols{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}}
+@media print{.modal-backdrop,.import-box,.bulk-box{display:none!important}}
+.legend{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin:.5rem 0}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+.dot{width:.85rem;height:.85rem;border-radius:4px;display:inline-block}
+
+@media(max-width:640px){
+  .slips{grid-template-columns:1fr}
+  .topbar .meta-live{margin-left:0;text-align:left;width:100%}
+}
+
+/* ---------- print ---------- */
+.print-only{display:none}
+@media print{
+  body{background:#fff}
+  .topbar,.tabs,.no-print{display:none!important}
+  main{max-width:100%;padding:0}
+  .panel{display:none!important}
+  .panel.print-active{display:block!important}
+  .card{box-shadow:none;border:none;padding:0;margin:0}
+  .slips{gap:8px}
+  .slip{break-inside:avoid}
+  .print-only{display:block}
+}
+@page{size:A4;margin:14mm}
+
+/* v6: drag paint unavailable cells + print layouts */
+.paint-mode{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);background:#fff;border-radius:999px;padding:.22rem .55rem;font-size:.78rem;font-weight:800;color:var(--muted)}
+.paint-mode input{accent-color:var(--warn)}
+.unavail-grid.painting .unavail-toggle{cursor:crosshair}
+.unavail-toggle.preview{outline:3px solid color-mix(in oklab,var(--accent) 45%,transparent);outline-offset:1px}
+.unavail-toggle.force-off.preview{outline-color:color-mix(in oklab,var(--good) 45%,transparent)}
+@media print{
+  html,body{width:100%;margin:0!important;padding:0!important}
+  body{font-size:10pt;line-height:1.35;background:#fff!important}
+  .topbar,.tabs,.no-print,.roster-panel,.quick-tools,.drop-hint,#asg-tbl,#panel-assign .card:nth-of-type(2){display:none!important}
+  main{max-width:none!important;width:100%!important;padding:0!important;margin:0!important}
+  .panel{display:none!important}
+  .panel.print-active{display:block!important}
+  .card{box-shadow:none!important;border:none!important;padding:0!important;margin:0!important;background:#fff!important}
+  .print-only{display:block!important}
+  .tbl-wrap{border:none!important;overflow:visible!important}
+  /* 割り当て一覧：A4横に収める */
+  body.print-assign{--print-scale:.92}
+  body.print-assign .builder{display:block!important}
+  body.print-assign #panel-assign{width:100%!important}
+  body.print-assign #asg-print-head{margin:0 0 4mm!important}
+  body.print-assign #asg-print-head .print-headline{font-size:14pt!important;margin:0 0 1mm!important}
+  body.print-assign #asg-print-head .print-subline{font-size:8.5pt!important;margin:0!important}
+  body.print-assign .sgrid{table-layout:fixed;width:100%!important;border-collapse:collapse!important;font-size:8.4pt!important;line-height:1.15!important}
+  body.print-assign .sgrid th,body.print-assign .sgrid td{padding:1.4mm 1mm!important;border:0.35pt solid #888!important;text-align:center!important;vertical-align:middle!important}
+  body.print-assign .sgrid .tcol{width:17mm!important;white-space:nowrap!important;background:#f1f1f1!important;color:#111!important;font-weight:700!important}
+  body.print-assign .sgrid .cell{height:12mm!important;min-width:0!important;background:#fff!important;color:#111!important}
+  body.print-assign .sgrid .cell.filled{background:#eef6f0!important}
+  body.print-assign .sgrid .cell.conflict,body.print-assign .sgrid .cell.ng{background:#fdebea!important;color:#111!important}
+  body.print-assign .sgrid .cell.empty{color:#777!important}
+  body.print-assign .sgrid .cell .slot-input,body.print-assign .sgrid .cell .clear-cell{display:none!important}
+  body.print-assign .sgrid .cell-person{font-size:8.2pt!important;line-height:1.15!important;margin:0!important;display:block!important;word-break:keep-all!important;overflow-wrap:anywhere!important}
+  body.print-assign .sgrid .cell-sub,body.print-assign .sgrid .cell-note{font-size:6.8pt!important;margin:0!important;color:#333!important}
+  body.print-assign @page{size:A4 landscape;margin:8mm}
+  /* 家庭配布カード：A4縦を3等分。裁断線を同じ位置に固定 */
+  body.print-notify{background:#fff!important}
+  body.print-notify #panel-notify{width:100%!important}
+  body.print-notify #ntf-print-head{display:none!important}
+  body.print-notify .slips{display:block!important;width:100%!important;margin:0!important;padding:0!important;gap:0!important}
+  body.print-notify .slip{height:89mm!important;min-height:89mm!important;max-height:89mm!important;width:100%!important;box-sizing:border-box!important;border:0!important;border-top:0.35pt dashed #777!important;border-radius:0!important;padding:7mm 8mm 6mm!important;margin:0!important;break-inside:avoid!important;page-break-inside:avoid!important;position:relative!important;background:#fff!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important}
+  body.print-notify .slip:nth-child(3n+1){border-top:0!important;page-break-before:auto!important}
+  body.print-notify .slip:nth-child(3n){page-break-after:always!important}
+  body.print-notify .slip .cut{display:none!important}
+  body.print-notify .slip .school{font-size:8.5pt!important;color:#333!important;margin-bottom:2mm!important}
+  body.print-notify .slip h3{font-size:13pt!important;line-height:1.35!important;margin:0 0 3mm!important;color:#111!important}
+  body.print-notify .slip .big{font-size:18pt!important;line-height:1.2!important;margin:3mm 0!important;color:#111!important}
+  body.print-notify .slip .rowline{font-size:10.5pt!important;line-height:1.5!important;margin:0.8mm 0!important}
+  body.print-notify .slip .rowline b{min-width:4.2em!important;color:#333!important}
+  body.print-notify .slip .note{font-size:9pt!important;line-height:1.45!important;margin-top:auto!important;border-top:0.35pt solid #aaa!important;padding-top:2.5mm!important;color:#333!important}
+  body.print-notify @page{size:A4 portrait;margin:15mm 14mm}
+}
+
+
+/* v7: 割り当て表印刷の整理・罫線強化 */
+@media print{
+  body.print-assign .topbar,
+  body.print-assign .tabs,
+  body.print-assign #panel-assign > .card > h2,
+  body.print-assign #panel-assign > .card > .lead,
+  body.print-assign #panel-assign > .card > .toolbar,
+  body.print-assign #panel-assign > .card > .legend,
+  body.print-assign #panel-assign .builder-panel > h3,
+  body.print-assign #panel-assign .builder-panel > .drop-hint,
+  body.print-assign #panel-assign .builder-panel > .quick-tools,
+  body.print-assign #panel-assign .roster-panel,
+  body.print-assign #asg-tbl,
+  body.print-assign #panel-assign .card:nth-of-type(2){
+    display:none!important;
+  }
+  body.print-assign #panel-assign .card:first-child{
+    display:block!important;
+    padding:0!important;
+    margin:0!important;
+  }
+  body.print-assign #asg-print-head{
+    display:block!important;
+    margin:0 0 3.5mm!important;
+    padding:0!important;
+  }
+  body.print-assign #asg-print-head .print-headline{
+    font-size:15pt!important;
+    line-height:1.25!important;
+    font-weight:800!important;
+    color:#000!important;
+    margin:0 0 1mm!important;
+  }
+  body.print-assign #asg-print-head .print-subline{
+    font-size:8pt!important;
+    color:#333!important;
+    margin:0!important;
+  }
+  body.print-assign .builder,
+  body.print-assign .builder-panel,
+  body.print-assign .tbl-wrap{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+  }
+  body.print-assign .sgrid{
+    width:100%!important;
+    table-layout:fixed!important;
+    border-collapse:collapse!important;
+    border-spacing:0!important;
+    border:1.2pt solid #555!important;
+    font-size:8.2pt!important;
+    line-height:1.15!important;
+    color:#000!important;
+  }
+  body.print-assign .sgrid th,
+  body.print-assign .sgrid td{
+    border:1pt solid #666!important;
+    box-shadow:inset 0 0 0 .35pt #666!important;
+    background-clip:padding-box!important;
+    padding:1.5mm .9mm!important;
+    text-align:center!important;
+    vertical-align:middle!important;
+  }
+  body.print-assign .sgrid thead th{
+    background:#f2f2f2!important;
+    color:#111!important;
+    font-weight:800!important;
+  }
+  body.print-assign .sgrid .tcol{
+    width:16mm!important;
+    min-width:16mm!important;
+    max-width:16mm!important;
+    background:#f2f2f2!important;
+    color:#000!important;
+    font-weight:800!important;
+    white-space:nowrap!important;
+  }
+  body.print-assign .sgrid .cell{
+    height:11.2mm!important;
+    min-width:0!important;
+    color:#000!important;
+    background:#fff!important;
+  }
+  body.print-assign .sgrid .cell.filled{
+    background:#eaf3ed!important;
+  }
+  body.print-assign .sgrid .cell.empty{
+    background:#fff!important;
+    color:#555!important;
+  }
+  body.print-assign .sgrid .cell.conflict,
+  body.print-assign .sgrid .cell.ng{
+    background:#fde7e5!important;
+    color:#000!important;
+  }
+  body.print-assign .sgrid .cell-person{
+    display:block!important;
+    font-size:8pt!important;
+    line-height:1.15!important;
+    font-weight:800!important;
+    margin:0!important;
+    color:#000!important;
+    overflow-wrap:anywhere!important;
+  }
+  body.print-assign .sgrid .cell-sub,
+  body.print-assign .sgrid .cell-note{
+    display:block!important;
+    font-size:6.5pt!important;
+    line-height:1.1!important;
+    margin:.4mm 0 0!important;
+    color:#333!important;
+  }
+}
+
+
+/* v8: 兄弟関係だけを割り当て表に表示 */
+.sibling-badge{display:inline-flex;align-items:center;justify-content:center;border:1px solid color-mix(in oklab,var(--board) 30%,transparent);background:color-mix(in oklab,var(--board) 8%,#fff);color:var(--board);border-radius:999px;padding:.05rem .42rem;font-size:.68rem;font-weight:900;margin-top:.12rem;line-height:1.3}
+.sibling-input{min-width:7.5rem}
+@media print{body.print-assign .sibling-badge{border:0!important;background:transparent!important;color:#111!important;font-size:6.8pt!important;padding:0!important;margin-top:.3mm!important;display:block!important}}
+
+
+/* v9: 担任からの一言を改行ごとの箇条書きで表示 */
+.teacher-note-input{min-height:6.8rem;resize:vertical;line-height:1.6}
+.slip .note-title{font-weight:900;color:var(--ink);font-size:.74rem;margin:0 0 .15rem}
+.slip .teacher-note-list{margin:.1rem 0 0;padding-left:1.2em;line-height:1.55}
+.slip .teacher-note-list li{margin:.06rem 0;padding-left:.05rem}
+.slip .teacher-note-list li::marker{color:var(--board);font-weight:900}
+@media print{
+  body.print-notify .slip .note-title{font-size:8.5pt!important;margin:0 0 1mm!important;color:#222!important}
+  body.print-notify .slip .teacher-note-list{margin:0!important;padding-left:1.2em!important;line-height:1.35!important}
+  body.print-notify .slip .teacher-note-list li{margin:.4mm 0!important;padding-left:0!important}
+}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="chalkmark">相談</div>
+      <div>
+        <h1>教育相談 日程調整ボード</h1>
+        <div class="sub">紙で集めた希望を集約 → 割り当て → 各家庭へお知らせ</div>
+      </div>
+    </div>
+    <div class="meta-live" id="metaLive"></div>
+  </div>
+</header>
+
+<nav class="tabs no-print" id="tabs">
+  <button class="tab active" data-tab="setup"><span class="n">1</span>日程・枠の設定</button>
+  <button class="tab" data-tab="students"><span class="n">2</span>生徒・希望の入力</button>
+  <button class="tab" data-tab="assign"><span class="n">3</span>割り当て表</button>
+  <button class="tab" data-tab="notify"><span class="n">4</span>お知らせ印刷</button>
+  <button class="tab" data-tab="data"><span class="n">5</span>保存・共有</button>
+</nav>
+
+<main>
+  <!-- ================= 1. SETUP ================= -->
+  <section class="panel active" id="panel-setup">
+    <div class="card">
+      <h2>基本情報</h2>
+      <p class="lead">お知らせに印刷される情報です。空欄でも動きます。</p>
+      <div class="grid cols">
+        <label class="field">学校名<input id="m-school" placeholder="例）〇〇中学校"></label>
+        <label class="field">学年<input id="m-grade" placeholder="例）第2学年"></label>
+        <label class="field">場所（教室など）<input id="m-place" placeholder="例）各教室"></label>
+        <label class="field">担任からの一言（任意）<textarea id="m-note" class="teacher-note-input" rows="4" placeholder="例）
+当日は保護者の方とお子さまでお越しください。
+ご都合が悪くなった場合は担任までご連絡ください。
+上履きをご持参ください。"></textarea></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>クラス（担任）</h2>
+      <p class="lead">学年内のクラスを登録します。クラスごとに割り当て表とお知らせを作れます。</p>
+      <div class="toolbar">
+        <input id="cls-input" placeholder="例）2年1組" style="border:1px solid var(--line);border-radius:9px;padding:.5rem .6rem;min-width:180px">
+        <button class="btn" id="cls-add">＋ クラスを追加</button>
+      </div>
+      <div id="cls-list" class="slot-row" style="padding:0"></div>
+    </div>
+
+    <div class="card">
+      <h2>日程と時間枠</h2>
+      <p class="lead">日付は何日でも追加できます。各日に「開始時刻・1コマの長さ・コマ数」からまとめて枠を作るか、1つずつ追加できます。</p>
+      <div class="toolbar">
+        <label class="field" style="flex-direction:row;align-items:center;gap:.4rem">日付を追加
+          <input type="date" id="day-date"></label>
+        <button class="btn" id="day-add">＋ この日を追加</button>
+        <button class="btn quick-preset" id="preset-5days">＋ 平日5日分を一括作成（14:00〜17:00／30分）</button>
+        <span class="spacer"></span>
+        <span class="chip" id="slot-count"></span>
+      </div>
+      <div class="hint">基本形は「平日5日分を一括作成」で、14:00〜17:00を30分刻み（14:00、14:30、15:00、15:30、16:00、16:30）にできます。必要に応じて各日の枠を追加・削除してください。</div>
+      <div class="bulk-box">
+        <h3>同じ時間割をまとめて作る</h3>
+        <p class="lead" style="margin-bottom:.7rem">「どの日も同じ時間帯・面談時間・休憩時間・コマ数」のときは、ここで一括作成できます。既存の日程に同じ日がある場合は、上書きするか追加だけにするか選べます。</p>
+        <div class="grid cols">
+          <label class="field">開始日<input type="date" id="bulk-start"></label>
+          <label class="field">平日何日分<input type="number" id="bulk-days" min="1" max="20" value="5"></label>
+          <label class="field">開始時刻<input type="time" id="bulk-time" value="14:00"></label>
+          <label class="field">面談時間（分）<input type="number" id="bulk-len" min="5" max="120" value="30"></label>
+          <label class="field">休憩時間（分）<input type="number" id="bulk-gap" min="0" max="60" value="0"></label>
+          <label class="field">コマ数<input type="number" id="bulk-count" min="1" max="20" value="6"></label>
+        </div>
+        <div class="toolbar" style="margin:.7rem 0 0">
+          <label class="checkline"><input type="checkbox" id="bulk-overwrite"> 同じ日があれば枠を上書きする</label>
+          <span class="spacer"></span>
+          <button class="btn accent" id="bulk-create">この設定で一括作成</button>
+          <button class="btn ghost" id="copy-first-day">最初の日の枠を全日にコピー</button>
+        </div>
+      </div>
+      <div id="days-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= 2. STUDENTS ================= -->
+  <section class="panel" id="panel-students">
+    <div class="card">
+      <h2>生徒と希望の入力</h2>
+      <p class="lead">紙で集まった「都合の悪い日（❌）」と、備考・相談内容を入力します。❌の日は自動割り当てで避けます。</p>
+      <div class="import-box no-print">
+        <h3 style="font-family:var(--disp);margin:.1rem 0 .35rem">スプレッドシート名簿の貼り付け／読み込み</h3>
+        <p class="lead" style="margin-bottom:.55rem">Googleスプレッドシートから「出席番号・氏名・兄弟関係・備考」の列をコピーして貼り付けできます。CSV/TSVファイルの読み込みもできます。</p>
+        <div class="grid cols">
+          <label class="field">取り込み先クラス<select id="import-class"></select></label>
+          <label class="field">取り込み方法<select id="import-mode"><option value="append">既存名簿に追加</option><option value="replace">このクラスの名簿を入れ替え</option></select></label>
+        </div>
+        <textarea id="import-text" placeholder="例：
+1	山田 太郎	弟1-1	進路相談あり
+2	佐藤 花子		15時以降希望
+
+※1行目が「番号	氏名	兄弟関係	備考」の見出しでもOK"></textarea>
+        <div class="toolbar" style="margin:.55rem 0 0">
+          <button class="btn" id="import-paste">貼り付け内容を名簿に取り込む</button>
+          <label class="btn ghost file-label">CSV/TSVを読み込む<input type="file" id="import-file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain"></label>
+          <button class="btn ghost" id="import-sample">入力例を入れる</button>
+          <span class="spacer"></span>
+          <span class="chip" id="import-status">未取り込み</span>
+        </div>
+        <div class="import-preview" id="import-preview">形式：出席番号、氏名、兄弟関係（任意）、備考（任意）。区切りはタブ・カンマどちらでも可。</div>
+      </div>
+      <div class="toolbar">
+        <label class="field" style="flex-direction:row;align-items:center;gap:.4rem">表示クラス
+          <select id="stu-class-filter"></select></label>
+        <button class="btn" id="stu-add">＋ 1行追加</button>
+        <button class="btn ghost" id="stu-add5">＋ 5行追加</button>
+        <span class="spacer"></span>
+        <span class="chip" id="stu-count"></span>
+      </div>
+      <div id="stu-area"></div>
+    </div>
+  </section>
+
+  <!-- ================= 3. ASSIGN ================= -->
+  <section class="panel" id="panel-assign">
+    <div class="card">
+      <h2>割り当て表</h2>
+      <p class="lead">希望をもとに枠へ割り当てます。同じ時間に2人入るとダブルブッキングとして赤く表示されます。</p>
+      <div class="toolbar">
+        <label class="field" style="flex-direction:row;align-items:center;gap:.4rem">対象クラス
+          <select id="asg-class"></select></label>
+        <button class="btn accent" id="asg-auto">希望から自動割り当て</button>
+        <button class="btn ghost" id="asg-clear">割り当てをクリア</button>
+        <span class="spacer"></span>
+        <label class="field" style="flex-direction:row;align-items:center;gap:.4rem">一覧の表示
+          <select id="asg-mode"><option value="no">出席番号のみ</option><option value="name" selected>出席番号＋氏名</option></select></label>
+        <button class="btn" id="asg-print">🖨 一覧を印刷</button>
+        <span class="chip" id="asg-status"></span>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:color-mix(in oklab,var(--good) 30%,var(--surface))"></i>確定</span>
+        <span><i class="dot" style="background:var(--warn-weak);border:1px solid var(--warn)"></i>ダブルブッキング</span>
+        <span><i class="dot" style="background:var(--surface-2)"></i>空き</span>
+      </div>
+      <div class="print-only" id="asg-print-head"></div>
+      <div class="builder">
+        <aside class="roster-panel no-print">
+          <h3>名簿</h3>
+          <div class="hint" style="margin:.35rem 0 .55rem">名簿カードを時間枠へドラッグ、または表の小さな入力欄に出席番号を入れて割り当てます。</div>
+          <input class="roster-search" id="roster-search" placeholder="番号・氏名で絞り込み">
+          <div class="roster-list" id="roster-list"></div>
+        </aside>
+        <div class="builder-panel">
+          <h3>一覧表を作る</h3>
+          <p class="drop-hint">各マスの番号欄に出席番号を入力して Enter、または左の名簿からドラッグ＆ドロップ。×でその枠の割り当てを外せます。</p>
+          <div class="quick-tools no-print">
+            <span class="chip">番号入力でもドラッグでもOK</span>
+          </div>
+          <div class="tbl-wrap"><table class="sgrid" id="sgrid"></table></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--disp);margin-bottom:.5rem">個別の割り当て（このクラス）</h3>
+      <p class="lead">従来通り、プルダウンでも直接指定・変更できます。❌の日に入れた場合は赤く表示します。</p>
+      <div class="tbl-wrap"><table id="asg-tbl"></table></div>
+    </div>
+  </section>
+
+  <!-- ================= 4. NOTIFY ================= -->
+  <section class="panel" id="panel-notify">
+    <div class="card no-print">
+      <h2>お知らせの印刷</h2>
+      <p class="lead">確定した日時を、A4タテ1枚に3名分で印刷します。3分割の裁断線をそろえているので、まとめて裁断できます。</p>
+      <div class="toolbar">
+        <label class="field" style="flex-direction:row;align-items:center;gap:.4rem">対象クラス
+          <select id="ntf-class"></select></label>
+        <label class="field" style="flex-direction:row;align-items:center;gap:.4rem">お知らせの宛名
+          <select id="ntf-mode"><option value="no">出席番号のみ</option><option value="name" selected>出席番号＋氏名</option></select></label>
+        <button class="btn accent" id="ntf-print">🖨 印刷する</button>
+        <span class="spacer"></span>
+        <span class="chip" id="ntf-status"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="print-only" id="ntf-print-head" style="margin-bottom:10px"></div>
+      <div class="slips" id="slips"></div>
+    </div>
+  </section>
+
+  <!-- ================= 5. DATA ================= -->
+  <section class="panel" id="panel-data">
+    <div class="card">
+      <h2>保存・共有・バックアップ</h2>
+      <p class="lead">入力内容はこのブラウザに自動保存されます。担任へ渡すときや別のPCで使うときは、ファイルに書き出して受け渡してください。</p>
+      <div class="toolbar">
+        <button class="btn" id="dl-json">💾 バックアップを書き出す（.json）</button>
+        <label class="btn ghost" style="margin:0">📂 バックアップを読み込む
+          <input type="file" id="up-json" accept="application/json" style="display:none"></label>
+        <button class="btn ghost" id="dl-csv">⬇ 割り当て一覧をCSVで書き出す</button>
+        <button class="btn danger" id="reset-all">すべて消去</button>
+      </div>
+      <div class="hint">受け渡しの流れ：学年主任が「日程・枠」を設定 → バックアップを書き出して各担任へ配布 → 各担任が自分のクラスの生徒・希望を入力 → 割り当て・お知らせを印刷。</div>
+      <div id="data-summary"></div>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--disp);margin-bottom:.4rem">使い方（かんたん）</h3>
+      <ol style="margin:.2rem 0 0;padding-left:1.2rem;color:var(--muted);font-size:.88rem;line-height:2">
+        <li><b>①日程・枠の設定</b>：クラスを登録し、面談日と時間枠を作ります。</li>
+        <li><b>②生徒・希望の入力</b>：紙の希望調査を第1〜3希望として入力します。</li>
+        <li><b>③割り当て表</b>：「自動割り当て」で❌の日を避けて下書き→ 表で手直し。</li>
+        <li><b>④お知らせ印刷</b>：各家庭あてカードを印刷（PDF保存も可）。</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<div class="modal-backdrop no-print" id="unavail-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="unavail-title">
+    <div class="modal-head">
+      <div>
+        <h2 id="unavail-title">不可日時の設定</h2>
+        <div class="lead" id="unavail-sub" style="margin:.15rem 0 0">日付ボタンはその日を全部❌、各マスはその時間だけ❌にします。</div>
+      </div>
+      <span class="spacer"></span>
+      <button class="btn ghost" id="unavail-close">閉じる</button>
+    </div>
+    <div class="unavail-tools">
+      <button class="btn sm ghost" id="unavail-clear">この生徒の❌をすべて解除</button>
+      <label class="paint-mode"><input type="radio" name="paint-mode" value="toggle" checked> なぞって反転</label>
+      <label class="paint-mode"><input type="radio" name="paint-mode" value="on"> なぞって❌</label>
+      <label class="paint-mode"><input type="radio" name="paint-mode" value="off"> なぞって○</label>
+      <span class="chip">ドラッグで囲むようになぞると、まとめて変更できます</span>
+    </div>
+    <div class="unavail-grid" id="unavail-grid"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const WD=["日","月","火","水","木","金","土"];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const $=s=>document.querySelector(s);
+const el=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
+
+let state=null;
+let saveTimer=null;
+const DEFAULT_STATE={
+  meta:{school:"",grade:"",place:"",note:""},
+  classes:[],           // [{id,name}]
+  days:[],              // [{id,date,slots:[{id,start,end}]}]
+  students:[]           // [{id,classId,no,name,ngDates,note,assigned}]
+};
+
+function migrate(s){
+  s.students.forEach(st=>{
+    if(!Array.isArray(st.ngDates))st.ngDates=[];
+    if(!Array.isArray(st.ngSlots))st.ngSlots=[];
+    if(st.note==null)st.note="";
+    if(st.sibling==null)st.sibling=extractSiblingLabel(st.note||"");
+  });
+  return s;
+}
+
+function save(){
+  renderMetaLive();
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    try{
+      localStorage.setItem("edu_soudan_v1",JSON.stringify(state));
+    }catch(err){
+      console.error("保存に失敗しました",err);
+    }
+  },250);
+}
+function load(){
+  try{
+    const raw=localStorage.getItem("edu_soudan_v1");
+    return raw?JSON.parse(raw):null;
+  }catch(err){
+    return null;
+  }
+}
+
+/* ---------- helpers ---------- */
+function allSlots(){const a=[];state.days.forEach(d=>d.slots.forEach(s=>a.push({...s,dayId:d.id,date:d.date})));return a;}
+function slotById(id){for(const d of state.days)for(const s of d.slots)if(s.id===id)return {...s,dayId:d.id,date:d.date};return null;}
+function dayLabel(date){if(!date)return "";const dt=new Date(date+"T00:00");const m=dt.getMonth()+1,day=dt.getDate();return `${m}/${day}`;}
+function dayWd(date){if(!date)return "";return WD[new Date(date+"T00:00").getDay()];}
+function slotLabel(s){if(!s)return "未定";return `${dayLabel(s.date)}(${dayWd(s.date)}) ${s.start}${s.end?"〜"+s.end:""}`;}
+function displayMode(id){const e=$(id);return e?e.value:"name";}
+function personLabel(s,mode){
+  const no=(s.no||"—")+"番";
+  if(mode==="no")return no;
+  return `${no} ${s.name||"（氏名未入力）"}`;
+}
+function familyLabel(s,mode){
+  if(mode==="no")return `出席番号 ${s.no||"—"}番 保護者様`;
+  return `${s.name||"（氏名未入力）"} さん 保護者様`;
+}
+function isNgDate(st,date){return Array.isArray(st.ngDates)&&st.ngDates.includes(date);}
+function isNgSlot(st,slot){return !!slot && (isNgDate(st,slot.date)|| (Array.isArray(st.ngSlots)&&st.ngSlots.includes(slot.id)));}
+function ngSummary(st){
+  const days=(st.ngDates||[]).slice().sort().map(d=>`${dayLabel(d)}(${dayWd(d)}) 全日`);
+  const slots=(st.ngSlots||[]).map(id=>slotById(id)).filter(Boolean).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start)).map(s=>`${dayLabel(s.date)} ${s.start}`);
+  const all=[...days,...slots];
+  if(!all.length)return "なし";
+  return all.slice(0,6).join("、")+(all.length>6?` ほか${all.length-6}件`:"");
+}
+function normalizeSiblingText(t){return String(t||"").replace(/[０-９]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0)).replace(/[ー―–−－]/g,"-").replace(/\s+/g,"");}
+function extractSiblingLabel(t){
+  const s=normalizeSiblingText(t);
+  // 例：弟1-1、妹2-3、兄3-2、姉1-4、弟1年1組、妹２の１ などを拾う
+  let m=s.match(/(兄|姉|弟|妹)(\d{1,2})(?:年)?[-の組]?(\d{1,2})(?:組)?/);
+  if(m)return `${m[1]}${m[2]}-${m[3]}`;
+  m=s.match(/(兄|姉|弟|妹).*?(\d{1,2})(?:年)?[-の組]?(\d{1,2})(?:組)?/);
+  if(m)return `${m[1]}${m[2]}-${m[3]}`;
+  return "";
+}
+function siblingLabel(st){return st.sibling||extractSiblingLabel(st.note||"");}
+function escHTML(v){return String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+function teacherNoteHTML(){
+  const raw=String(state.meta.note||"");
+  const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(x=>x.replace(/^[・･\-－—–*＊●○□■\s]+/,""));
+  if(!lines.length)return `<div class="note"><div class="note-title">担任から一言</div><ul class="teacher-note-list"><li>ご都合が悪い場合は担任までご連絡ください。</li></ul></div>`;
+  return `<div class="note"><div class="note-title">担任から一言</div><ul class="teacher-note-list">${lines.map(x=>`<li>${escHTML(x)}</li>`).join("")}</ul></div>`;
+}
+function studentsOf(classId){return state.students.filter(s=>s.classId===classId);}
+function addMinutes(t,min){const [h,m]=t.split(":").map(Number);const d=new Date(2000,0,1,h,m+min);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+
+/* ============ TABS ============ */
+$("#tabs").addEventListener("click",e=>{
+  const b=e.target.closest(".tab");if(!b)return;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  b.classList.add("active");
+  $("#panel-"+b.dataset.tab).classList.add("active");
+  renderAll();
+});
+
+/* ============ META ============ */
+["school","grade","place","note"].forEach(k=>{
+  const inp=$("#m-"+k);
+  inp.addEventListener("input",()=>{state.meta[k]=inp.value;save();});
+});
+function fillMeta(){["school","grade","place","note"].forEach(k=>$("#m-"+k).value=state.meta[k]||"");}
+function renderMetaLive(){
+  const sl=allSlots().length, asg=state.students.filter(s=>s.assigned).length;
+  $("#metaLive").innerHTML=`クラス <b>${state.classes.length}</b> ・ 枠 <b>${sl}</b> ・ 割当済 <b>${asg}/${state.students.length}</b>`;
+}
+
+/* ============ CLASSES ============ */
+$("#cls-add").addEventListener("click",()=>{
+  const v=$("#cls-input").value.trim();if(!v)return;
+  state.classes.push({id:uid(),name:v});$("#cls-input").value="";save();renderAll();
+});
+$("#cls-input").addEventListener("keydown",e=>{if(e.key==="Enter")$("#cls-add").click();});
+function renderClasses(){
+  const box=$("#cls-list");box.innerHTML="";
+  if(!state.classes.length){box.innerHTML='<span class="chip">まだクラスがありません</span>';return;}
+  state.classes.forEach(c=>{
+    const p=el("span","slot-pill");
+    p.innerHTML=`<span>${c.name}</span>`;
+    const x=el("button","x");x.textContent="×";x.title="削除";
+    x.onclick=()=>{
+      if(studentsOf(c.id).length && !confirm(c.name+" を削除します。所属する生徒も削除されます。よろしいですか？"))return;
+      state.classes=state.classes.filter(k=>k.id!==c.id);
+      state.students=state.students.filter(s=>s.classId!==c.id);
+      save();renderAll();
+    };
+    p.appendChild(x);box.appendChild(p);
+  });
+}
+
+/* ============ DAYS / SLOTS ============ */
+$("#day-add").addEventListener("click",()=>{
+  const d=$("#day-date").value;if(!d){alert("日付を選んでください。");return;}
+  if(state.days.some(x=>x.date===d)){alert("その日付は既にあります。");return;}
+  state.days.push({id:uid(),date:d,slots:[]});
+  state.days.sort((a,b)=>a.date.localeCompare(b.date));
+  $("#day-date").value="";save();renderDays();renderMetaLive();
+});
+$("#preset-5days").addEventListener("click",()=>{
+  const start=$("#day-date").value;
+  if(!start){alert("開始日を選んでから押してください。");return;}
+  addPresetFiveWeekdays(start);
+});
+function addPresetFiveWeekdays(startDate){
+  let d=new Date(startDate+"T00:00");
+  let added=0, guard=0;
+  const starts=["14:00","14:30","15:00","15:30","16:00","16:30"];
+  while(added<5 && guard<14){
+    const wd=d.getDay();
+    if(wd!==0 && wd!==6){
+      const iso=d.toISOString().slice(0,10);
+      let day=state.days.find(x=>x.date===iso);
+      if(!day){day={id:uid(),date:iso,slots:[]};state.days.push(day);}
+      starts.forEach(st=>{
+        if(!day.slots.some(s=>s.start===st))day.slots.push({id:uid(),start:st,end:addMinutes(st,30)});
+      });
+      day.slots.sort((a,b)=>a.start.localeCompare(b.start));
+      added++;
+    }
+    d.setDate(d.getDate()+1);guard++;
+  }
+  state.days.sort((a,b)=>a.date.localeCompare(b.date));
+  save();renderAll();
+}
+$("#bulk-create").addEventListener("click",()=>{
+  const start=$("#bulk-start").value;
+  if(!start){alert("開始日を選んでください。");return;}
+  const n=parseInt($("#bulk-days").value,10)||5;
+  const t=$("#bulk-time").value||"14:00";
+  const len=parseInt($("#bulk-len").value,10)||30;
+  const gap=parseInt($("#bulk-gap").value,10)||0;
+  const cnt=parseInt($("#bulk-count").value,10)||6;
+  const overwrite=$("#bulk-overwrite").checked;
+  bulkCreateDays(start,n,t,len,gap,cnt,overwrite);
+});
+$("#copy-first-day").addEventListener("click",()=>{
+  if(state.days.length<2){alert("コピーするには日程が2日以上必要です。");return;}
+  const src=state.days[0];
+  if(!src.slots.length){alert("最初の日に時間枠がありません。");return;}
+  if(!confirm(`${dayLabel(src.date)}(${dayWd(src.date)}) の枠を、他の全日にコピーします。既存の枠は置き換えます。よろしいですか？`))return;
+  state.days.forEach((d,i)=>{
+    if(i===0)return;
+    const oldIds=d.slots.map(s=>s.id);
+    state.students.forEach(st=>{if(oldIds.includes(st.assigned))st.assigned=""; st.ngSlots=(st.ngSlots||[]).filter(id=>!oldIds.includes(id));});
+    d.slots=src.slots.map(s=>({id:uid(),start:s.start,end:s.end}));
+  });
+  save();renderAll();
+});
+function buildSlots(start,len,gap,cnt){
+  const slots=[];let t=start;
+  for(let i=0;i<cnt;i++){const e=addMinutes(t,len);slots.push({id:uid(),start:t,end:e});t=addMinutes(e,gap);}return slots;
+}
+function bulkCreateDays(startDate,n,start,len,gap,cnt,overwrite){
+  let d=new Date(startDate+"T00:00");let added=0,guard=0;
+  while(added<n && guard<n+20){
+    const wd=d.getDay();
+    if(wd!==0 && wd!==6){
+      const iso=d.toISOString().slice(0,10);
+      let day=state.days.find(x=>x.date===iso);
+      if(!day){day={id:uid(),date:iso,slots:[]};state.days.push(day);}
+      if(overwrite){
+        const oldIds=day.slots.map(s=>s.id);
+        state.students.forEach(st=>{if(oldIds.includes(st.assigned))st.assigned=""; st.ngSlots=(st.ngSlots||[]).filter(id=>!oldIds.includes(id));});
+        day.slots=[];
+      }
+      const made=buildSlots(start,len,gap,cnt);
+      made.forEach(ns=>{if(overwrite || !day.slots.some(s=>s.start===ns.start))day.slots.push(ns);});
+      day.slots.sort((a,b)=>a.start.localeCompare(b.start));
+      added++;
+    }
+    d.setDate(d.getDate()+1);guard++;
+  }
+  state.days.sort((a,b)=>a.date.localeCompare(b.date));
+  save();renderAll();
+}
+function renderDays(){
+  const box=$("#days-list");box.innerHTML="";
+  $("#slot-count").textContent="時間枠 合計 "+allSlots().length+" コマ";
+  if(!state.days.length){box.innerHTML='<div class="empty-state">面談日を追加してください（基本は5日ですが、何日でもOK）。</div>';return;}
+  state.days.forEach(day=>{
+    const wrap=el("div","day-block");
+    const head=el("div","day-head");
+    head.innerHTML=`<span class="dlabel">${dayLabel(day.date)}<span class="wd">(${dayWd(day.date)})</span></span>`;
+    const bulk=el("button","btn sm ghost");bulk.textContent="＋枠をまとめて作成";
+    bulk.onclick=()=>bulkSlots(day);
+    const one=el("button","btn sm ghost");one.textContent="＋1コマ追加";
+    one.onclick=()=>{
+      const last=day.slots[day.slots.length-1];
+      const start=last?last.end||last.start:"15:30";
+      day.slots.push({id:uid(),start,end:addMinutes(start,25)});save();renderDays();renderMetaLive();
+    };
+    const del=el("button","btn sm danger");del.textContent="この日を削除";
+    del.onclick=()=>{
+      const ids=day.slots.map(s=>s.id);
+      if(state.students.some(s=>ids.includes(s.assigned)) && !confirm("この日に割り当て済みの生徒がいます。削除すると割り当ても外れます。続けますか？"))return;
+      state.students.forEach(s=>{if(ids.includes(s.assigned))s.assigned="";});
+      state.days=state.days.filter(d=>d.id!==day.id);save();renderAll();
+    };
+    const sp=el("span");sp.className="spacer";sp.style.flex="1";
+    head.append(sp,bulk,one,del);
+    wrap.appendChild(head);
+
+    const row=el("div","slot-row");
+    if(!day.slots.length){row.innerHTML='<span class="chip">枠なし</span>';}
+    day.slots.forEach(s=>{
+      const pill=el("span","slot-pill");
+      pill.innerHTML=`<span>${s.start}${s.end?"〜"+s.end:""}</span>`;
+      const x=el("button","x");x.textContent="×";
+      x.onclick=()=>{
+        if(state.students.some(st=>st.assigned===s.id)) state.students.forEach(st=>{if(st.assigned===s.id)st.assigned="";});
+        day.slots=day.slots.filter(k=>k.id!==s.id);save();renderDays();renderMetaLive();
+      };
+      pill.appendChild(x);row.appendChild(pill);
+    });
+    wrap.appendChild(row);
+    box.appendChild(wrap);
+  });
+}
+function bulkSlots(day){
+  const start=prompt("開始時刻を入力（例 15:30）","15:30");if(!start||!/^\d{1,2}:\d{2}$/.test(start))return;
+  const len=parseInt(prompt("1コマの長さ（分）","25"),10);if(!len||len<=0)return;
+  const cnt=parseInt(prompt("コマ数","6"),10);if(!cnt||cnt<=0)return;
+  const gap=parseInt(prompt("コマ間の間隔（分・休憩など。無ければ0）","5"),10)||0;
+  let t=start;
+  for(let i=0;i<cnt;i++){
+    const e=addMinutes(t,len);
+    day.slots.push({id:uid(),start:t,end:e});
+    t=addMinutes(e,gap);
+  }
+  save();renderDays();renderMetaLive();
+}
+
+/* ============ STUDENTS ============ */
+let stuFilter="all";
+$("#stu-class-filter").addEventListener("change",e=>{stuFilter=e.target.value;renderStudents();});
+$("#stu-add").addEventListener("click",()=>addStudents(1));
+$("#stu-add5").addEventListener("click",()=>addStudents(5));
+function addStudents(n){
+  let cid=stuFilter!=="all"?stuFilter:(state.classes[0]&&state.classes[0].id);
+  if(!cid){alert("先に「日程・枠の設定」でクラスを登録してください。");return;}
+  const base=studentsOf(cid).length;
+  for(let i=0;i<n;i++)state.students.push({id:uid(),classId:cid,no:String(base+i+1),name:"",ngDates:[],ngSlots:[],sibling:"",note:"",assigned:""});
+  save();renderStudents();
+}
+function classSelectHTML(sel){
+  return state.classes.map(c=>`<option value="${c.id}" ${c.id===sel?"selected":""}>${c.name}</option>`).join("");
+}
+function slotOptions(sel,placeholder){
+  let o=`<option value="">${placeholder||"—"}</option>`;
+  state.days.forEach(d=>{
+    d.slots.forEach(s=>{o+=`<option value="${s.id}" ${s.id===sel?"selected":""}>${dayLabel(d.date)}(${dayWd(d.date)}) ${s.start}</option>`;});
+  });
+  return o;
+}
+function fillClassFilters(){
+  const opts='<option value="all">全クラス</option>'+state.classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+  const f=$("#stu-class-filter");const cur=f.value;f.innerHTML=opts;f.value=[...f.options].some(o=>o.value===cur)?cur:"all";stuFilter=f.value;
+  ["#asg-class","#ntf-class","#import-class"].forEach(id=>{
+    const sel=$(id);const c=sel.value;
+    sel.innerHTML=state.classes.map(x=>`<option value="${x.id}">${x.name}</option>`).join("");
+    if([...sel.options].some(o=>o.value===c))sel.value=c;
+  });
+}
+function renderStudents(){
+  const area=$("#stu-area");
+  if(!state.classes.length){area.innerHTML='<div class="empty-state">先に「①日程・枠の設定」でクラスを登録してください。</div>';$("#stu-count").textContent="";return;}
+  const list=state.students.filter(s=>stuFilter==="all"||s.classId===stuFilter);
+  $("#stu-count").textContent="生徒 "+list.length+" 名";
+  if(!list.length){area.innerHTML='<div class="empty-state">名簿を貼り付けるか、「＋1行追加」で入力を始めましょう。</div>';return;}
+  const t=el("div","tbl-wrap");
+  let head=`<thead><tr><th>番号</th><th>氏名</th>${stuFilter==="all"?"<th>クラス</th>":""}<th>不可日時（❌）</th><th>兄弟関係</th><th>備考・相談内容</th><th></th></tr></thead>`;
+  let rows="";
+  list.forEach(s=>{
+    if(!Array.isArray(s.ngDates))s.ngDates=[]; if(!Array.isArray(s.ngSlots))s.ngSlots=[];
+    rows+=`<tr data-id="${s.id}">
+      <td><input class="num" data-f="no" value="${s.no||""}"></td>
+      <td><input data-f="name" value="${s.name||""}" placeholder="氏名"></td>
+      ${stuFilter==="all"?`<td><select data-f="classId">${classSelectHTML(s.classId)}</select></td>`:""}
+      <td>${unavailCellHTML(s)}</td>
+      <td><input class="sibling-input" data-f="sibling" value="${s.sibling||extractSiblingLabel(s.note||"")}" placeholder="例）弟1-1"></td>
+      <td class="note-cell"><input data-f="note" value="${s.note||""}" placeholder="例）進路相談／15時以降希望 など"></td>
+      <td style="text-align:center"><button class="btn sm danger" data-del="${s.id}">削除</button></td>
+    </tr>`;
+  });
+  t.innerHTML=`<table>${head}<tbody>${rows}</tbody></table>`;
+  area.innerHTML="";area.appendChild(t);
+  t.querySelectorAll("input,select").forEach(inp=>{
+    inp.addEventListener("change",e=>{
+      const id=e.target.closest("tr").dataset.id;const f=e.target.dataset.f;
+      if(!f)return;
+      const st=state.students.find(x=>x.id===id);st[f]=e.target.value;save();
+      if(f==="classId")renderStudents();
+    });
+  });
+  t.querySelectorAll("[data-ng-date]").forEach(b=>b.onclick=()=>{
+    const id=b.closest("tr").dataset.id;
+    const st=state.students.find(x=>x.id===id);
+    if(!Array.isArray(st.ngDates))st.ngDates=[]; if(!Array.isArray(st.ngSlots))st.ngSlots=[];
+    const d=b.dataset.ngDate;
+    if(st.ngDates.includes(d))st.ngDates=st.ngDates.filter(x=>x!==d);
+    else {
+      st.ngDates.push(d);
+      const day=state.days.find(x=>x.date===d);
+      if(day)st.ngSlots=st.ngSlots.filter(id=>!day.slots.some(sl=>sl.id===id));
+    }
+    const sl=slotById(st.assigned);
+    if(sl && isNgSlot(st,sl))st.assigned="";
+    save();renderStudents();renderAssign();
+  });
+  t.querySelectorAll("[data-unavail-open]").forEach(b=>b.onclick=()=>openUnavailModal(b.dataset.unavailOpen));
+  t.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    state.students=state.students.filter(x=>x.id!==b.dataset.del);save();renderStudents();renderAssign();
+  });
+}
+function unavailCellHTML(s){
+  if(!state.days.length)return '<span class="chip">日程未設定</span>';
+  const dayBtns=state.days.map(d=>{
+    const on=(s.ngDates||[]).includes(d.date);
+    return `<button type="button" class="ng-btn ${on?"active":""}" data-ng-date="${d.date}" title="この日を全て不可として切替">${on?"❌ ":""}${dayLabel(d.date)}(${dayWd(d.date)})</button>`;
+  }).join("");
+  const slotN=(s.ngSlots||[]).length;
+  return `<div class="unavail-summary"><div class="ng-days">${dayBtns}</div><button type="button" class="btn sm ghost" data-unavail-open="${s.id}">時間帯も設定</button>${slotN?`<span class="unavail-chip bad">時間❌ ${slotN}枠</span>`:""}</div>`;
+}
+function ngButtonsHTML(s){return unavailCellHTML(s);}
+
+/* ============ UNAVAILABLE TIME MODAL ============ */
+let editingUnavailId="";
+function openUnavailModal(id){
+  editingUnavailId=id;
+  const st=state.students.find(s=>s.id===id);if(!st)return;
+  $("#unavail-title").textContent=`不可日時の設定：${personLabel(st,"name")}`;
+  $("#unavail-sub").textContent="日付見出しを押すとその日を全部❌、各マスを押すとその時間だけ❌にできます。";
+  renderUnavailGrid();
+  $("#unavail-modal").classList.add("active");
+  $("#unavail-modal").setAttribute("aria-hidden","false");
+}
+function closeUnavailModal(){
+  $("#unavail-modal").classList.remove("active");
+  $("#unavail-modal").setAttribute("aria-hidden","true");
+  editingUnavailId="";
+  renderStudents();renderAssign();
+}
+$("#unavail-close").addEventListener("click",closeUnavailModal);
+$("#unavail-modal").addEventListener("click",e=>{if(e.target.id==="unavail-modal")closeUnavailModal();});
+$("#unavail-clear").addEventListener("click",()=>{
+  const st=state.students.find(s=>s.id===editingUnavailId);if(!st)return;
+  st.ngDates=[];st.ngSlots=[];save();renderUnavailGrid();
+});
+function getPaintMode(){return (document.querySelector('input[name="paint-mode"]:checked')||{}).value||"toggle";}
+function setUnavailableSlot(st,slotId,mode){
+  const sl=slotById(slotId);if(!sl)return false;
+  if(isNgDate(st,sl.date))return false;
+  if(!Array.isArray(st.ngSlots))st.ngSlots=[];
+  const has=st.ngSlots.includes(slotId);
+  const want=mode==="on"?true:(mode==="off"?false:!has);
+  if(want && !has)st.ngSlots.push(slotId);
+  if(!want && has)st.ngSlots=st.ngSlots.filter(x=>x!==slotId);
+  if(want && st.assigned===slotId)st.assigned="";
+  return true;
+}
+function renderUnavailGrid(){
+  const st=state.students.find(s=>s.id===editingUnavailId);const box=$("#unavail-grid");
+  if(!st||!state.days.length){box.innerHTML='<div class="empty-state">日程がありません。</div>';return;}
+  const times=[...new Set(allSlots().map(s=>s.start))].sort();
+  let html='<table><thead><tr><th class="timehead">時間</th>';
+  state.days.forEach(d=>{const on=isNgDate(st,d.date);html+=`<th><button class="unavail-toggle ${on?"active":""}" data-modal-day="${d.date}">${on?"❌ ":""}${dayLabel(d.date)}(${dayWd(d.date)})</button></th>`;});
+  html+='</tr></thead><tbody>';
+  times.forEach(tm=>{
+    html+=`<tr><td class="timehead">${tm}</td>`;
+    state.days.forEach(d=>{
+      const sl=d.slots.find(x=>x.start===tm);
+      if(!sl){html+='<td style="background:repeating-linear-gradient(45deg,#f4f0e6,#f4f0e6 5px,#fbf8f1 5px,#fbf8f1 10px)">—</td>';return;}
+      const dayOn=isNgDate(st,d.date);const on=dayOn||(st.ngSlots||[]).includes(sl.id);
+      html+=`<td><button class="unavail-toggle ${on?"active":""}" data-modal-slot="${sl.id}" ${dayOn?"data-day-locked='1' title='日付全体が❌です'":""}>${on?"❌":"○"}</button></td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  box.innerHTML=html;
+  box.querySelectorAll("[data-modal-day]").forEach(b=>b.onclick=()=>{
+    const d=b.dataset.modalDay;
+    if(st.ngDates.includes(d))st.ngDates=st.ngDates.filter(x=>x!==d);
+    else {st.ngDates.push(d);const day=state.days.find(x=>x.date===d);if(day)st.ngSlots=(st.ngSlots||[]).filter(id=>!day.slots.some(sl=>sl.id===id));}
+    const sl=slotById(st.assigned);if(sl&&isNgSlot(st,sl))st.assigned="";
+    save();renderUnavailGrid();
+  });
+  let painting=false;
+  const touched=new Set();
+  function paintButton(b){
+    const id=b.dataset.modalSlot;
+    if(!id || touched.has(id))return;
+    if(b.dataset.dayLocked){return;}
+    touched.add(id);
+    const mode=getPaintMode();
+    if(setUnavailableSlot(st,id,mode)){
+      const sl=slotById(id);
+      const on=isNgSlot(st,sl);
+      b.classList.toggle("active",on);
+      b.textContent=on?"❌":"○";
+      b.classList.add("preview");
+      if(mode==="off")b.classList.add("force-off");
+    }
+  }
+  box.querySelectorAll("[data-modal-slot]").forEach(b=>{
+    b.addEventListener("click",e=>{
+      if(painting)return;
+      const id=b.dataset.modalSlot;const sl=slotById(id);if(!sl)return;
+      if(isNgDate(st,sl.date)){
+        alert("この日は全体が❌です。時間だけ変更したい場合は、まず日付見出しの❌を解除してください。");return;
+      }
+      setUnavailableSlot(st,id,"toggle");
+      save();renderUnavailGrid();
+    });
+    b.addEventListener("pointerdown",e=>{
+      if(e.button!==0)return;
+      painting=true;touched.clear();box.classList.add("painting");
+      b.setPointerCapture && b.setPointerCapture(e.pointerId);
+      paintButton(b);e.preventDefault();
+    });
+    b.addEventListener("pointerenter",()=>{if(painting)paintButton(b);});
+  });
+  const endPaint=()=>{
+    if(!painting)return;
+    painting=false;box.classList.remove("painting");
+    if(touched.size){save();renderUnavailGrid();}
+  };
+  document.addEventListener("pointerup",endPaint,{once:true});
+}
+
+/* ============ ASSIGN ============ */
+$("#asg-auto").addEventListener("click",autoAssign);
+$("#asg-clear").addEventListener("click",()=>{
+  const cid=$("#asg-class").value;
+  studentsOf(cid).forEach(s=>s.assigned="");save();renderAssign();
+});
+function autoAssign(){
+  const cid=$("#asg-class").value;if(!cid)return;
+  const taken=new Set();
+  const slots=allSlots().sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+  const list=studentsOf(cid).sort((a,b)=>(parseInt(a.no)||0)-(parseInt(b.no)||0));
+  list.forEach(s=>{if(s.assigned && !taken.has(s.assigned)){taken.add(s.assigned);}else if(s.assigned){s.assigned="";}});
+  list.forEach(s=>{
+    if(s.assigned)return;
+    const ok=slots.find(sl=>!taken.has(sl.id)&&!isNgSlot(s,sl));
+    if(ok){s.assigned=ok.id;taken.add(ok.id);}
+  });
+  save();renderAssign();
+  const un=list.filter(s=>!s.assigned).length;
+  if(un)alert("自動割り当て完了。❌の日を避けたうえで、枠が足りない／条件が合わない生徒が "+un+" 名います。表で手動調整してください。");
+}
+function renderRoster(){
+  const box=$("#roster-list");
+  if(!box)return;
+  const cid=$("#asg-class").value;
+  const mode=displayMode("#asg-mode");
+  const q=($("#roster-search")?.value||"").trim().toLowerCase();
+  box.innerHTML="";
+  if(!cid){box.innerHTML='<div class="empty-state">クラスを選択してください。</div>';return;}
+  let list=studentsOf(cid).sort((a,b)=>(parseInt(a.no)||0)-(parseInt(b.no)||0));
+  if(q)list=list.filter(s=>(s.no||"").toLowerCase().includes(q)||(s.name||"").toLowerCase().includes(q));
+  if(!list.length){box.innerHTML='<div class="empty-state">名簿がありません。「②生徒・希望の入力」で登録してください。</div>';return;}
+  list.forEach(s=>{
+    const c=el("div","roster-card"+(s.assigned?" assigned":""));
+    c.draggable=true;
+    c.dataset.sid=s.id;
+    const sib=siblingLabel(s);
+    c.innerHTML=`<span class="badge">${s.no||"—"}</span><span class="rname">${mode==="no"?"出席番号のみ":(s.name||"氏名未入力")}</span>${sib?`<span class="sibling-badge">${sib}</span>`:""}`;
+    c.title=`❌：${ngSummary(s)}${sib?"\n兄弟関係："+sib:""}${s.note?"\n備考："+s.note:""}${s.assigned?"\n割当済："+slotLabel(slotById(s.assigned)):"\nドラッグして時間枠へ"}`;
+    c.addEventListener("dragstart",ev=>{ev.dataTransfer.setData("text/student-id",s.id);ev.dataTransfer.effectAllowed="move";});
+    box.appendChild(c);
+  });
+}
+function studentByNo(cid,no){
+  const n=String(no||"").trim().replace(/[０-９]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0));
+  if(!n)return null;
+  return studentsOf(cid).find(s=>String(s.no||"").trim()===n)||null;
+}
+function assignStudentToSlot(studentId,slotId){
+  const st=state.students.find(s=>s.id===studentId);
+  const sl=slotById(slotId);
+  if(!st||!sl)return;
+  if(isNgSlot(st,sl)){
+    if(!confirm(`${personLabel(st,"name")} は ${dayLabel(sl.date)}(${dayWd(sl.date)}) が❌になっています。この枠に入れますか？`))return;
+  }
+  // 1人1枠にする。移動なら前の枠から移す。
+  st.assigned=slotId;
+  save();renderAssign();
+}
+function clearSlotForClass(cid,slotId){
+  studentsOf(cid).forEach(s=>{if(s.assigned===slotId)s.assigned="";});
+  save();renderAssign();
+}
+function renderAssign(){
+  const cid=$("#asg-class").value;
+  const grid=$("#sgrid");
+  if(!cid||!state.days.length){grid.innerHTML="";$("#sgrid").innerHTML='<tr><td class="empty-state">クラスと日程を設定してください。</td></tr>';$("#asg-tbl").innerHTML="";$("#asg-status").textContent="";renderRoster();return;}
+  const list=studentsOf(cid);
+  const mode=displayMode("#asg-mode");
+  const cls=state.classes.find(c=>c.id===cid);
+  $("#asg-print-head").innerHTML=`<div class="print-headline">教育相談（三者面談）割り当て一覧 ／ ${cls?cls.name:""}</div>`;
+  // count assignment per slot for conflict
+  const cnt={};list.forEach(s=>{if(s.assigned)cnt[s.assigned]=(cnt[s.assigned]||0)+1;});
+  const peopleBySlot={};list.forEach(s=>{if(s.assigned){(peopleBySlot[s.assigned]||(peopleBySlot[s.assigned]=[])).push(s);}});
+
+  // unique start times as rows
+  const times=[...new Set(allSlots().map(s=>s.start))].sort();
+  let head="<thead><tr><th class='tcol'>時間 \\ 日</th>";
+  state.days.forEach(d=>head+=`<th>${dayLabel(d.date)}(${dayWd(d.date)})</th>`);
+  head+="</tr></thead>";
+  let body="<tbody>";
+  times.forEach(tm=>{
+    body+=`<tr><td class="tcol">${tm}</td>`;
+    state.days.forEach(d=>{
+      const sl=d.slots.find(x=>x.start===tm);
+      if(!sl){body+='<td class="cell" style="background:repeating-linear-gradient(45deg,#f4f0e6,#f4f0e6 5px,#fbf8f1 5px,#fbf8f1 10px)"></td>';return;}
+      const ps=peopleBySlot[sl.id]||[];
+      const hasNg=ps.some(st=>isNgSlot(st,sl));
+      const clsName=ps.length>1?"conflict":(hasNg?"ng":(ps.length===1?"filled":"empty"));
+      const inputVal=ps.length===1?(ps[0].no||""):"";
+      const names=ps.length?ps.map(s=>personLabel(s,mode)).join("／"):"空き";
+      const sibTxt=ps.map(s=>siblingLabel(s)).filter(Boolean).join("／");
+      const ngTxt=hasNg?"❌の日":"";
+      body+=`<td class="cell dropzone ${clsName}" data-slot="${sl.id}">
+        <button class="clear-cell no-print" data-clear-slot="${sl.id}" title="この枠を空にする">×</button>
+        <input class="slot-input no-print" data-slot-input="${sl.id}" value="${inputVal}" placeholder="番" inputmode="numeric" title="出席番号を入力">
+        <span class="cell-person">${names}</span>${ngTxt?`<span class="cell-sub">${ngTxt}</span>`:""}${sibTxt?`<span class="sibling-badge">${sibTxt}</span>`:""}
+      </td>`;
+    });
+    body+="</tr>";
+  });
+  body+="</tbody>";
+  grid.innerHTML=head+body;
+
+  grid.querySelectorAll(".dropzone").forEach(cell=>{
+    cell.addEventListener("dragover",ev=>{ev.preventDefault();cell.classList.add("drag-over");ev.dataTransfer.dropEffect="move";});
+    cell.addEventListener("dragleave",()=>cell.classList.remove("drag-over"));
+    cell.addEventListener("drop",ev=>{
+      ev.preventDefault();cell.classList.remove("drag-over");
+      const sid=ev.dataTransfer.getData("text/student-id")||ev.dataTransfer.getData("text/plain");
+      if(sid)assignStudentToSlot(sid,cell.dataset.slot);
+    });
+  });
+  grid.querySelectorAll("[data-slot-input]").forEach(inp=>{
+    const apply=()=>{
+      const st=studentByNo(cid,inp.value);
+      if(!String(inp.value||"").trim()){clearSlotForClass(cid,inp.dataset.slot);return;}
+      if(!st){alert("その出席番号の生徒が名簿にいません。先に②で名簿登録してください。");inp.value="";return;}
+      assignStudentToSlot(st.id,inp.dataset.slot);
+    };
+    inp.addEventListener("change",apply);
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();apply();}});
+  });
+  grid.querySelectorAll("[data-clear-slot]").forEach(b=>b.onclick=()=>clearSlotForClass(cid,b.dataset.clearSlot));
+
+  // individual table
+  const at=$("#asg-tbl");
+  const personHead=mode==="no"?"<th>出席番号</th>":"<th>番号</th><th>氏名</th>";
+  let rows=`<thead><tr>${personHead}<th>条件・備考</th><th>割り当て</th><th>状態</th></tr></thead><tbody>`;
+  list.forEach(s=>{
+    const sib=siblingLabel(s);
+    const cond=`❌ ${ngSummary(s)}${sib?"<br>兄弟関係："+sib:""}`;
+    const sl=s.assigned?slotById(s.assigned):null;
+    const conflict=s.assigned && cnt[s.assigned]>1;
+    const ng=sl&&isNgSlot(s,sl);
+    const st=!s.assigned?'<span class="chip wait">未割当</span>':conflict?'<span class="chip bad">重複</span>':ng?'<span class="chip bad">❌日</span>':'<span class="chip ok">確定</span>';
+    const personCells=mode==="no"?`<td>${s.no||""}</td>`:`<td>${s.no||""}</td><td>${s.name||""}</td>`;
+    rows+=`<tr data-id="${s.id}">${personCells}<td style="font-size:.78rem;color:var(--muted)">${cond}</td>
+      <td><select data-asg>${assignOptions(s,cnt)}</select></td><td>${st}</td></tr>`;
+  });
+  rows+="</tbody>";
+  at.innerHTML=rows;
+  at.querySelectorAll("[data-asg]").forEach(sel=>{
+    sel.addEventListener("change",e=>{
+      const id=e.target.closest("tr").dataset.id;
+      state.students.find(x=>x.id===id).assigned=e.target.value;save();renderAssign();
+    });
+  });
+
+  const asgN=list.filter(s=>s.assigned).length;
+  const conf=Object.values(cnt).filter(c=>c>1).length;
+  $("#asg-status").textContent=`割当 ${asgN}/${list.length}` + (conf?` ・ 重複 ${conf}枠`:"");
+  $("#asg-status").className="chip "+(conf?"bad":(asgN===list.length&&list.length?"ok":"wait"));
+  renderRoster();
+}
+function assignOptions(s,cnt){
+  let o=`<option value="">未割当</option>`;
+  state.days.forEach(d=>d.slots.forEach(sl=>{
+    const taken=(cnt[sl.id]||0)>0 && s.assigned!==sl.id;
+    const ng=isNgDate(s,d.date);
+    const label=`${dayLabel(d.date)}(${dayWd(d.date)}) ${sl.start}${ng?" ❌":""}${taken?"（使用中）":""}`;
+    o+=`<option value="${sl.id}" ${sl.id===s.assigned?"selected":""} ${ng?"style='color:#c0392b;font-weight:700'":""}>${label}</option>`;
+  }));
+  return o;
+}
+$("#asg-class").addEventListener("change",renderAssign);
+$("#asg-mode").addEventListener("change",()=>{saveModePref("edu_soudan_asg_mode",$("#asg-mode").value);renderAssign();});
+$("#roster-search").addEventListener("input",renderRoster);
+function setPrintMode(mode){
+  document.body.classList.remove("print-assign","print-notify");
+  if(mode)document.body.classList.add(mode);
+  let st=$("#dynamic-page-style");
+  if(!st){st=document.createElement("style");st.id="dynamic-page-style";document.head.appendChild(st);}
+  st.textContent=mode==="print-assign"?"@page{size:A4 landscape;margin:8mm}":(mode==="print-notify"?"@page{size:A4 portrait;margin:15mm 14mm}":"@page{size:A4;margin:14mm}");
+}
+window.addEventListener("afterprint",()=>setPrintMode(""));
+window.addEventListener("beforeprint",()=>{if($("#panel-assign")&&$("#panel-assign").classList.contains("print-active"))setPrintMode("print-assign");if($("#panel-notify")&&$("#panel-notify").classList.contains("print-active"))setPrintMode("print-notify");});
+$("#asg-print").addEventListener("click",()=>{
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("print-active"));
+  $("#panel-assign").classList.add("print-active");
+  setPrintMode("print-assign");
+  window.print();
+});
+
+/* ============ NOTIFY ============ */
+$("#ntf-class").addEventListener("change",renderNotify);
+$("#ntf-mode").addEventListener("change",()=>{saveModePref("edu_soudan_ntf_mode",$("#ntf-mode").value);renderNotify();});
+$("#ntf-print").addEventListener("click",()=>{
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("print-active"));
+  $("#panel-notify").classList.add("print-active");
+  setPrintMode("print-notify");
+  window.print();
+});
+function renderNotify(){
+  const cid=$("#ntf-class").value;
+  const box=$("#slips");
+  const mode=displayMode("#ntf-mode");
+  const cls=state.classes.find(c=>c.id===cid);
+  const list=studentsOf(cid).filter(s=>s.assigned).sort((a,b)=>(parseInt(a.no)||0)-(parseInt(b.no)||0));
+  $("#ntf-print-head").innerHTML=`<h2 style="font-family:var(--disp)">教育相談（三者面談）日時のお知らせ ／ ${cls?cls.name:""}</h2><div class="print-subline">宛名表示：${mode==="no"?"出席番号のみ":"出席番号＋氏名"}</div>`;
+  if(!cid){box.innerHTML='<div class="empty-state">クラスを選択してください。</div>';$("#ntf-status").textContent="";return;}
+  if(!list.length){box.innerHTML='<div class="empty-state">確定済みの生徒がいません。「③割り当て表」で割り当ててください。</div>';$("#ntf-status").textContent="0 件";return;}
+  $("#ntf-status").textContent=list.length+" 件を印刷";
+  box.innerHTML="";
+  list.forEach(s=>{
+    const sl=slotById(s.assigned);
+    const card=el("div","slip");
+    card.innerHTML=`
+      <span class="cut">- - - - キリトリ - - - -</span>
+      <div class="school">${state.meta.school||""} ${state.meta.grade||""} ${cls?cls.name:""}</div>
+      <h3>${familyLabel(s,mode)}</h3>
+      <div style="font-size:.78rem;color:var(--muted)">教育相談（三者面談）の日時が下記に決まりました。</div>
+      <div class="big">${dayLabel(sl.date)}（${dayWd(sl.date)}）　${sl.start}${sl.end?"〜"+sl.end:""}</div>
+      <div class="rowline"><b>場所</b>${state.meta.place||"—"}</div>
+      ${mode==="name"?`<div class="rowline"><b>出席番号</b>${s.no||"—"}</div>`:""}
+      ${teacherNoteHTML()}
+    `;
+    box.appendChild(card);
+  });
+}
+
+/* ============ ROSTER IMPORT ============ */
+$("#import-paste").addEventListener("click",()=>importRosterText($("#import-text").value));
+$("#import-sample").addEventListener("click",()=>{
+  $("#import-text").value="1\t山田 太郎\t弟1-1\t進路相談あり\n2\t佐藤 花子\t\t15時以降希望\n3\t鈴木 一郎\t兄3-2\t兄弟の面談と近い時間希望";
+  previewImport();
+});
+$("#import-text").addEventListener("input",previewImport);
+$("#import-file").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{$("#import-text").value=r.result;previewImport();};
+  r.readAsText(f);e.target.value="";
+});
+function parseRosterText(txt){
+  const lines=String(txt||"").replace(/^\uFEFF/,"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const rows=[];
+  lines.forEach((line,i)=>{
+    let parts=line.includes("\t")?line.split("\t"):line.split(",");
+    parts=parts.map(x=>x.trim().replace(/^"|"$/g,""));
+    if(i===0 && /番号|出席|氏名|名前/.test(parts.join("")))return;
+    const no=parts[0]||""; const name=parts[1]||"";
+    let sibling="", note="";
+    if(parts.length>=4){sibling=parts[2]||""; note=parts.slice(3).filter(Boolean).join(" ");}
+    else {const third=parts[2]||""; const guessed=extractSiblingLabel(third); if(guessed){sibling=guessed;} else {note=third; sibling=extractSiblingLabel(third);}}
+    if(no||name)rows.push({no,name,sibling,note});
+  });
+  return rows;
+}
+function previewImport(){
+  const rows=parseRosterText($("#import-text").value);
+  $("#import-status").textContent=rows.length?`${rows.length}名を認識`:"未取り込み";
+  $("#import-preview").textContent=rows.length?`先頭：${rows.slice(0,3).map(r=>`${r.no} ${r.name}`).join("／")}`:"形式：出席番号、氏名、兄弟関係（任意）、備考（任意）。区切りはタブ・カンマどちらでも可。";
+}
+function importRosterText(txt){
+  const cid=$("#import-class").value || (state.classes[0]&&state.classes[0].id);
+  if(!cid){alert("先にクラスを登録してください。");return;}
+  const rows=parseRosterText(txt);
+  if(!rows.length){alert("取り込める名簿が見つかりません。出席番号・氏名の順で貼り付けてください。");return;}
+  if($("#import-mode").value==="replace"){
+    if(!confirm("このクラスの既存名簿を入れ替えます。よろしいですか？"))return;
+    state.students=state.students.filter(s=>s.classId!==cid);
+  }
+  const existing=studentsOf(cid);
+  rows.forEach(r=>{
+    const same=existing.find(s=>String(s.no||"").trim()===String(r.no||"").trim());
+    if(same){same.name=r.name||same.name;same.sibling=r.sibling||same.sibling||extractSiblingLabel(r.note||"");same.note=r.note||same.note;}
+    else state.students.push({id:uid(),classId:cid,no:r.no,name:r.name,ngDates:[],ngSlots:[],sibling:r.sibling||extractSiblingLabel(r.note||""),note:r.note||"",assigned:""});
+  });
+  save();renderAll();
+  $("#import-status").textContent=`${rows.length}名を取り込み済み`;
+}
+
+/* ============ DATA ============ */
+$("#dl-json").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  downloadBlob(blob,"教育相談_バックアップ.json");
+});
+$("#up-json").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);
+    if(!d.classes||!d.days||!d.students)throw 0;
+    state=migrate(d);save();renderAll();alert("読み込みました。");
+  }catch(err){alert("読み込めませんでした。正しいバックアップファイルか確認してください。");}};
+  r.readAsText(f);e.target.value="";
+});
+$("#dl-csv").addEventListener("click",()=>{
+  let rows=[["クラス","番号","氏名","確定日","曜日","開始","終了","状態","不可日時","兄弟関係","備考・相談内容"]];
+  const cnt={};state.students.forEach(s=>{if(s.assigned)cnt[s.assigned]=(cnt[s.assigned]||0)+1;});
+  state.classes.forEach(c=>{
+    studentsOf(c.id).sort((a,b)=>(parseInt(a.no)||0)-(parseInt(b.no)||0)).forEach(s=>{
+      const sl=s.assigned?slotById(s.assigned):null;
+      const ng=sl&&isNgSlot(s,sl);
+      const st=!s.assigned?"未割当":(cnt[s.assigned]>1?"重複":(ng?"❌日":"確定"));
+      rows.push([c.name,s.no||"",s.name||"",sl?dayLabel(sl.date):"",sl?dayWd(sl.date):"",sl?sl.start:"",sl&&sl.end?sl.end:"",st,ngSummary(s),siblingLabel(s),s.note||""]);
+    });
+  });
+  const csv="\uFEFF"+rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  downloadBlob(new Blob([csv],{type:"text/csv"}),"教育相談_割り当て一覧.csv");
+});
+$("#reset-all").addEventListener("click",()=>{
+  if(!confirm("すべてのデータを消去します。元に戻せません。よろしいですか？"))return;
+  try{localStorage.removeItem("edu_soudan_v1");}catch(err){}
+  state=migrate(JSON.parse(JSON.stringify(DEFAULT_STATE)));
+  save();renderAll();
+});
+function downloadBlob(blob,name){
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function renderSummary(){
+  const asg=state.students.filter(s=>s.assigned).length;
+  $("#data-summary").innerHTML=`<div class="legend" style="margin-top:.8rem">
+    <span class="chip">クラス ${state.classes.length}</span>
+    <span class="chip">面談日 ${state.days.length}日</span>
+    <span class="chip">時間枠 ${allSlots().length}コマ</span>
+    <span class="chip">生徒 ${state.students.length}名</span>
+    <span class="chip ok">割当済 ${asg}名</span>
+    <span class="chip wait">未割当 ${state.students.length-asg}名</span>
+  </div>`;
+}
+
+/* ============ RENDER ALL ============ */
+function saveModePref(key,val){
+  try{localStorage.setItem(key,val);}catch(err){console.error("表示設定の保存に失敗しました",err);}
+}
+function restoreModes(){
+  try{
+    const am=localStorage.getItem("edu_soudan_asg_mode");
+    if(am && $("#asg-mode"))$("#asg-mode").value=am;
+  }catch(err){}
+  try{
+    const nm=localStorage.getItem("edu_soudan_ntf_mode");
+    if(nm && $("#ntf-mode"))$("#ntf-mode").value=nm;
+  }catch(err){}
+}
+function renderAll(){
+  fillMeta();fillClassFilters();restoreModes();
+  renderClasses();renderDays();renderStudents();renderAssign();renderNotify();renderSummary();renderMetaLive();
+}
+function init(){
+  const loaded=load();
+  state=migrate(loaded||JSON.parse(JSON.stringify(DEFAULT_STATE)));
+  restoreModes();
+  renderAll();
+}
+init();
+</script>
+</body>
+</html>
