@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>教育相談 日程調整ボード v11</title>
+<title>教育相談 日程調整ボード v12</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
@@ -73,7 +73,8 @@ a{color:var(--board)}
 .tab.active{background:var(--board);color:#fff;border-color:var(--board);box-shadow:var(--shadow-sm)}
 .tab.active .n{background:rgba(255,255,255,.22);color:#fff}
 
-main{max-width:1180px;margin:0 auto;padding:var(--space)}
+/* 画面下端のプルダウン見切れ防止用スペーサー */
+main{max-width:1180px;margin:0 auto;padding:var(--space);padding-bottom:15rem}
 .panel{display:none;animation:fade .25s ease}
 .panel.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -111,73 +112,73 @@ td input,td select{width:100%;border:1px solid transparent;background:transparen
 td input:hover,td select:hover{border-color:var(--line)}
 td input:focus,td select:focus{border-color:var(--board);background:#fff;outline:none}
 .num{width:3.2rem;text-align:center}
-.tbl-wrap{overflow-x:auto;border:1px solid var(--line-soft);border-radius:var(--radius-sm)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line-soft);border-radius:var(--radius-sm);padding-bottom:1.5rem}
 
 .chip{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;font-weight:700;
   padding:.12rem .5rem;border-radius:999px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line-soft)}
 .chip.ok{background:color-mix(in oklab,var(--good) 14%,var(--surface));color:var(--good);border-color:transparent}
 .chip.bad{background:var(--warn-weak);color:var(--warn);border-color:transparent}
 .chip.wait{background:var(--accent-weak);color:var(--accent);border-color:transparent}
+.chip.blocked{background:#e0e0e0;color:#555;border-color:transparent}
 
 .day-block{border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:.8rem;overflow:hidden}
 .day-head{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;background:var(--surface-2);padding:.55rem .7rem}
 .day-head .dlabel{font-family:var(--disp);font-weight:700;font-size:1rem}
 .day-head .dlabel .wd{color:var(--accent);margin-left:.15rem}
 .slot-row{display:flex;flex-wrap:wrap;gap:.4rem;padding:.6rem .7rem}
-.slot-pill{display:inline-flex;align-items:center;gap:.4rem;background:var(--surface);border:1px solid var(--line);
-  border-radius:999px;padding:.28rem .3rem .28rem .7rem;font-size:.82rem;font-weight:700}
-.slot-pill .x{border:none;background:transparent;color:var(--warn);font-weight:900;font-size:1rem;line-height:1;padding:0 .25rem;border-radius:50%}
+.slot-pill{display:inline-flex;align-items:center;gap:.35rem;background:var(--surface);border:1px solid var(--line);
+  border-radius:999px;padding:.28rem .35rem .28rem .7rem;font-size:.82rem;font-weight:700;transition:.12s}
+.slot-pill.blocked{background:#e8e8e8;color:#888;text-decoration:line-through;border-style:dashed}
+.slot-pill .btn-pill{border:none;background:transparent;padding:0 .2rem;font-size:.85rem;line-height:1;border-radius:4px;cursor:pointer}
+.slot-pill .x{color:var(--warn);font-weight:900;font-size:1rem}
 .slot-pill .x:hover{background:var(--warn-weak)}
 
 .sgrid th,.sgrid td{text-align:center}
 .sgrid .tcol{white-space:nowrap;font-weight:700;background:var(--surface-2);color:var(--muted);font-size:.8rem}
-.sgrid .cell{min-width:120px;height:44px;cursor:default}
+.sgrid .cell{min-width:130px;height:52px;cursor:default;position:relative}
 .sgrid .cell.filled{background:color-mix(in oklab,var(--good) 12%,var(--surface));font-weight:700}
 .sgrid .cell.conflict{background:var(--warn-weak);color:var(--warn);font-weight:700}
 .sgrid .cell.empty{color:color-mix(in oklab,var(--muted) 60%,transparent)}
+/* 休止枠・空け枠のスタイル（生徒がいないマスのみ適用） */
+.sgrid .cell.blocked-cell{
+  background:repeating-linear-gradient(45deg, #eee, #eee 8px, #e4e4e4 8px, #e4e4e4 16px) !important;
+  color:#777 !important;
+}
 
-.slips{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.slip{border:2px dashed var(--line);border-radius:12px;padding:14px 16px;background:#fff;position:relative}
-.slip .cut{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--bg);color:var(--muted);
-  font-size:.66rem;padding:0 .4rem}
-.slip h3{font-size:1rem;margin-bottom:.2rem}
-.slip .school{font-size:.72rem;color:var(--muted)}
-.slip .big{font-family:var(--disp);font-weight:900;font-size:1.35rem;color:var(--board);margin:.4rem 0 .1rem}
-.slip .rowline{font-size:.82rem;margin:.15rem 0}
-.slip .rowline b{display:inline-block;min-width:3.4em;color:var(--muted);font-weight:700}
-.slip .note{font-size:.75rem;color:var(--muted);margin-top:.4rem;border-top:1px dotted var(--line);padding-top:.35rem}
-
-.empty-state{text-align:center;color:var(--muted);padding:2rem 1rem;font-size:.9rem}
-.hint{font-size:.8rem;color:var(--muted);background:var(--surface-2);border-left:3px solid var(--accent);
-  padding:.55rem .75rem;border-radius:0 8px 8px 0;margin:.6rem 0}
-
-.print-headline{font-family:var(--disp);font-weight:700;font-size:1.2rem;margin:0 0 .6rem;color:var(--ink)}
-.print-subline{font-size:.82rem;color:var(--muted);margin:0 0 .8rem}
-
-.builder{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:var(--space);align-items:start}
-.roster-panel{border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--surface-2);padding:.75rem;position:sticky;top:72px}
+.builder{display:grid;grid-template-columns:minmax(230px,310px) 1fr;gap:var(--space);align-items:start}
+.roster-panel{border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--surface-2);padding:.75rem;position:sticky;top:72px;transition:.15s}
+.roster-panel.drag-over{outline:3px dashed var(--warn);background:var(--warn-weak)}
 .roster-panel h3,.builder-panel h3{font-family:var(--disp);font-size:1rem;margin:0 0 .45rem;color:var(--ink)}
 .roster-search{width:100%;border:1px solid var(--line);border-radius:var(--radius-sm);padding:.45rem .55rem;background:#fff;margin:.35rem 0 .55rem}
-.roster-list{display:flex;flex-direction:column;gap:.35rem;max-height:420px;overflow:auto;padding-right:.15rem}
-.roster-card{display:flex;align-items:center;gap:.5rem;background:#fff;border:1px solid var(--line);border-radius:10px;padding:.42rem .5rem;font-weight:700;box-shadow:0 1px 2px rgba(28,40,34,.04);user-select:none;transition:.1s}
-.roster-card[draggable="true"]{cursor:grab}
+.roster-list{display:flex;flex-direction:column;gap:.35rem;max-height:460px;overflow:auto;padding-right:.15rem}
+.roster-card{display:flex;align-items:center;gap:.5rem;background:#fff;border:1px solid var(--line);border-radius:10px;padding:.42rem .5rem;font-weight:700;box-shadow:0 1px 2px rgba(28,40,34,.04);user-select:none;transition:.1s;cursor:grab}
+.roster-card:active{cursor:grabbing}
 .roster-card.assigned{opacity:.48;background:color-mix(in oklab,var(--good) 8%,#fff)}
 .roster-card .badge{display:inline-flex;align-items:center;justify-content:center;min-width:2.2rem;height:1.55rem;border-radius:999px;background:var(--board);color:#fff;font-size:.78rem}
 .roster-card .rname{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .builder-panel{min-width:0}
 .drop-hint{font-size:.78rem;color:var(--muted);margin:.25rem 0 .65rem}
-.sgrid .cell.dropzone{position:relative;transition:.12s;border:2px solid transparent;min-width:150px;padding:.3rem}
+
+/* マス上の操作ボタン・ドラッグ仕様 */
+.sgrid .cell.dropzone{position:relative;transition:.12s;border:2px solid transparent;min-width:150px;padding:.3rem .25rem}
 .sgrid .cell.dropzone:hover{border-color:color-mix(in oklab,var(--board) 45%,transparent);background:color-mix(in oklab,var(--board) 6%,var(--surface))}
 .sgrid .cell.dropzone.drag-over{border-color:var(--accent);background:var(--accent-weak);box-shadow:inset 0 0 0 2px color-mix(in oklab,var(--accent) 22%,transparent)}
-.sgrid .cell .slot-input{width:3.6rem;text-align:center;border:1px solid var(--line);border-radius:8px;background:#fff;padding:.28rem .35rem;font-weight:700;font-size:.82rem}
-.sgrid .cell .slot-input:focus{outline:2px solid var(--board);outline-offset:1px}
-.sgrid .cell .cell-person{display:block;margin-top:.24rem;font-weight:700;font-size:.82rem;line-height:1.35}
-.sgrid .cell .cell-sub{display:block;color:var(--muted);font-size:.7rem;font-weight:700;margin-top:.12rem}
-.sgrid .cell .clear-cell{position:absolute;top:2px;right:3px;border:none;background:transparent;color:var(--warn);font-weight:900;border-radius:50%;line-height:1;padding:.1rem .28rem}
-.sgrid .cell .clear-cell:hover{background:var(--warn-weak)}
-.sgrid .cell.conflict .slot-input{border-color:var(--warn);color:var(--warn)}
-.quick-tools{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;margin:.65rem 0}
-@media(max-width:820px){.builder{grid-template-columns:1fr}.roster-panel{position:static}.roster-list{max-height:220px}}
+
+.sgrid .cell .cell-controls{display:flex;align-items:center;justify-content:space-between;gap:.2rem;margin-bottom:.15rem}
+.sgrid .cell .slot-input{width:3.4rem;text-align:center;border:1px solid var(--line);border-radius:6px;background:#fff;padding:.15rem .25rem;font-weight:700;font-size:.8rem}
+.sgrid .cell .cell-actions{display:flex;gap:.15rem}
+.sgrid .cell .btn-cell-act{border:none;background:transparent;cursor:pointer;padding:.1rem .25rem;border-radius:4px;font-size:.78rem;line-height:1}
+.sgrid .cell .btn-cell-act:hover{background:rgba(0,0,0,.08)}
+
+/* マス内のドラッグ可能生徒アイテム */
+.cell-student-box{cursor:grab;padding:.15rem .2rem;border-radius:6px;transition:.1s;user-select:none}
+.cell-student-box:hover{background:rgba(255,255,255,.6);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.cell-student-box:active{cursor:grabbing}
+.sgrid .cell .cell-person{display:block;font-weight:700;font-size:.82rem;line-height:1.3}
+.sgrid .cell .cell-sub{display:block;color:var(--muted);font-size:.7rem;font-weight:700;margin-top:.08rem}
+.sgrid .cell .cell-block-msg{font-size:.74rem;font-weight:800;color:#666;display:flex;align-items:center;justify-content:center;gap:.25rem;padding:.4rem 0}
+/* 休止枠なのに生徒が残っている場合の警告表示 */
+.sgrid .cell .cell-blocked-warn{display:block;font-size:.7rem;font-weight:900;color:var(--warn);margin-bottom:.1rem}
 
 .ng-days{display:flex;flex-wrap:wrap;gap:.28rem;min-width:220px}
 .ng-btn{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:.22rem .48rem;font-size:.74rem;font-weight:700;line-height:1.2}
@@ -210,7 +211,7 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
 .unavail-grid .timehead{position:sticky;left:0;background:var(--surface-2);z-index:2;font-weight:700;color:var(--muted)}
 .unavail-toggle{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.28rem .45rem;font-size:.74rem;font-weight:900;min-width:3rem;color:var(--muted);touch-action:none}
 .unavail-toggle.active{background:var(--warn-weak);border-color:color-mix(in oklab,var(--warn) 45%,transparent);color:var(--warn)}
-.unavail-tools{display:flex;gap:.4rem;flex-wrap:wrap;margin:.55rem 0}
+.unavail-tools{display:flex;gap:.4rem;flex-wrap:wrap;margin:.55rem 0;align-items:center}
 .file-label{position:relative;overflow:hidden}
 .file-label input{position:absolute;inset:0;opacity:0;cursor:pointer}
 @media(max-width:760px){.modal{padding:.8rem}.unavail-grid td{min-width:82px}.bulk-box .grid.cols{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}}
@@ -218,16 +219,28 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
 .legend span{display:inline-flex;align-items:center;gap:.35rem}
 .dot{width:.85rem;height:.85rem;border-radius:4px;display:inline-block}
 
-@media(max-width:640px){
-  .slips{grid-template-columns:1fr}
-  .topbar .meta-live{margin-left:0;text-align:left;width:100%}
-}
-
+/* なぞって一括設定のUI */
 .paint-mode{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);background:#fff;border-radius:999px;padding:.22rem .55rem;font-size:.78rem;font-weight:800;color:var(--muted)}
 .paint-mode input{accent-color:var(--warn)}
 .unavail-grid.painting .unavail-toggle{cursor:crosshair}
 .unavail-toggle.preview{outline:3px solid color-mix(in oklab,var(--accent) 45%,transparent);outline-offset:1px}
 .unavail-toggle.force-off.preview{outline-color:color-mix(in oklab,var(--good) 45%,transparent)}
+
+.slips{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.slip{border:2px dashed var(--line);border-radius:12px;padding:14px 16px;background:#fff;position:relative}
+.slip .cut{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--bg);color:var(--muted);font-size:.66rem;padding:0 .4rem}
+.slip h3{font-size:1rem;margin-bottom:.2rem}
+.slip .school{font-size:.72rem;color:var(--muted)}
+.slip .big{font-family:var(--disp);font-weight:900;font-size:1.35rem;color:var(--board);margin:.4rem 0 .1rem}
+.slip .rowline{font-size:.82rem;margin:.15rem 0}
+.slip .rowline b{display:inline-block;min-width:3.4em;color:var(--muted);font-weight:700}
+.slip .note{font-size:.75rem;color:var(--muted);margin-top:.4rem;border-top:1px dotted var(--line);padding-top:.35rem}
+
+.empty-state{text-align:center;color:var(--muted);padding:2rem 1rem;font-size:.9rem}
+.hint{font-size:.8rem;color:var(--muted);background:var(--surface-2);border-left:3px solid var(--accent);padding:.55rem .75rem;border-radius:0 8px 8px 0;margin:.6rem 0}
+
+.print-headline{font-family:var(--disp);font-weight:700;font-size:1.2rem;margin:0 0 .6rem;color:var(--ink)}
+.print-subline{font-size:.82rem;color:var(--muted);margin:0 0 .8rem}
 
 .sibling-badge{display:inline-flex;align-items:center;justify-content:center;border:1px solid color-mix(in oklab,var(--board) 30%,transparent);background:color-mix(in oklab,var(--board) 8%,#fff);color:var(--board);border-radius:999px;padding:.05rem .42rem;font-size:.68rem;font-weight:900;margin-top:.12rem;line-height:1.3}
 .sibling-input{min-width:7.5rem}
@@ -250,7 +263,7 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
   .panel.print-active{display:block!important}
   .card{box-shadow:none!important;border:none!important;padding:0!important;margin:0!important;background:#fff!important}
   .print-only{display:block!important}
-  .tbl-wrap{border:none!important;overflow:visible!important}
+  .tbl-wrap{border:none!important;overflow:visible!important;padding-bottom:0!important}
 
   /* 割り当て表 (A4横) */
   body.print-assign #asg-print-head{display:block!important;margin:0 0 4mm!important}
@@ -264,9 +277,11 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
   body.print-assign .sgrid .cell{height:11.5mm!important;min-width:0!important;background:#fff!important;color:#000!important}
   body.print-assign .sgrid .cell.filled{background:#eef6f0!important}
   body.print-assign .sgrid .cell.conflict,body.print-assign .sgrid .cell.ng{background:#fdebea!important}
-  body.print-assign .sgrid .cell .slot-input,body.print-assign .sgrid .cell .clear-cell{display:none!important}
+  body.print-assign .sgrid .cell.blocked-cell{background:#e8e8e8!important;color:#666!important}
+  body.print-assign .sgrid .cell .slot-input,body.print-assign .sgrid .cell .clear-cell,body.print-assign .sgrid .cell .cell-controls{display:none!important}
   body.print-assign .sgrid .cell-person{font-size:8pt!important;line-height:1.15!important;margin:0!important;display:block!important;font-weight:800!important}
   body.print-assign .sgrid .cell-sub{font-size:6.5pt!important;margin:0!important;color:#444!important}
+  body.print-assign .sgrid .cell-blocked-warn{font-size:6.5pt!important;color:#000!important;margin:0!important}
   body.print-assign .sibling-badge{border:0!important;background:transparent!important;color:#111!important;font-size:6.8pt!important;padding:0!important;margin-top:.3mm!important;display:block!important}
 
   /* お知らせカード (A4縦 3分割) */
@@ -292,7 +307,7 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
     <div class="brand">
       <div class="chalkmark">相談</div>
       <div>
-        <h1>教育相談 日程調整ボード <span style="font-size:0.8em;opacity:0.8">v11</span></h1>
+        <h1>教育相談 日程調整ボード <span style="font-size:0.8em;opacity:0.8">v12</span></h1>
         <div class="sub">紙で集めた希望を集約 → 最適割り当て → 各家庭へお知らせ</div>
       </div>
     </div>
@@ -347,7 +362,7 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
 
     <div class="card">
       <h2>日程と時間枠</h2>
-      <p class="lead">面談日とコマを設定します。</p>
+      <p class="lead">面談日とコマを設定します。各コマの「🔒」を押すと、最初から面談を行わない「休止・空け枠」として設定できます。</p>
       <div class="toolbar">
         <label class="field" style="flex-direction:row;align-items:center;gap:.4rem">日付を追加
           <input type="date" id="day-date"></label>
@@ -419,7 +434,7 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
   <section class="panel" id="panel-assign">
     <div class="card">
       <h2>割り当て表</h2>
-      <p class="lead">希望をもとに枠へ割り当てます。ドラッグ＆ドロップで生徒同士の配置を簡単に入れ替えることも可能です。</p>
+      <p class="lead">希望をもとに枠へ割り当てます。<strong>マス内の生徒カードをドラッグして別マスへ移動・入れ替え（スワップ）</strong>したり、<strong>左の名簿へドラッグして割り当てを解除</strong>できます。空きマスの「🔒」を押すと面談を行わない「休止・空け枠」に設定できます。</p>
       <div class="toolbar">
         <label class="field" style="flex-direction:row;align-items:center;gap:.4rem">対象クラス
           <select id="asg-class"></select></label>
@@ -435,18 +450,19 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
         <span><i class="dot" style="background:color-mix(in oklab,var(--good) 30%,var(--surface))"></i>確定</span>
         <span><i class="dot" style="background:var(--warn-weak);border:1px solid var(--warn)"></i>重複／不可日</span>
         <span><i class="dot" style="background:var(--surface-2)"></i>空き</span>
+        <span><i class="dot" style="background:#e0e0e0;border:1px dashed #888"></i>休止・空け枠 (🔒)</span>
       </div>
       <div class="print-only" id="asg-print-head"></div>
       <div class="builder">
-        <aside class="roster-panel no-print">
+        <aside class="roster-panel no-print" id="roster-panel">
           <h3>名簿</h3>
-          <div class="hint" style="margin:.35rem 0 .55rem">カードをドラッグするか、表のマスに番号を入力します。</div>
+          <div class="hint" style="margin:.35rem 0 .55rem">カードをマスへドラッグ。<strong>マスからここへドラッグすると解除</strong>できます。</div>
           <input class="roster-search" id="roster-search" placeholder="番号・氏名で絞り込み">
           <div class="roster-list" id="roster-list"></div>
         </aside>
         <div class="builder-panel">
           <h3>一覧表</h3>
-          <p class="drop-hint">マスの入力欄に出席番号を入力して Enter、または左の名簿からドラッグ。配置済みのマスへドラッグすると<strong>生徒を入れ替え</strong>ます。</p>
+          <p class="drop-hint">マスの生徒をつかんで<strong>他のマスへ移動・入れ替え</strong>が可能。空きマスの「🔒」で休止枠化（自動割当でも除外されます）。</p>
           <div class="tbl-wrap"><table class="sgrid" id="sgrid"></table></div>
         </div>
       </div>
@@ -454,7 +470,7 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
     <div class="card no-print">
       <h3 style="font-family:var(--disp);margin-bottom:.5rem">個別の割り当て（このクラス）</h3>
       <p class="lead">プルダウンでも直接指定・変更できます。</p>
-      <div class="tbl-wrap"><table id="asg-tbl"></table></div>
+      <div class="tbl-wrap" style="min-height:220px"><table id="asg-tbl"></table></div>
     </div>
   </section>
 
@@ -483,7 +499,7 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
   <section class="panel" id="panel-data">
     <div class="card">
       <h2>保存・共有・バックアップ</h2>
-      <p class="lead">入力内容はブラウザに自動保存されます。学年主任と担任間での受け渡しや合体（マージ）にはJSONファイルをご使用ください。</p>
+      <p class="lead">入力内容はブラウザに自動保存されます。v11のバックアップファイル（.json）もそのまま読み込めます。</p>
       <div class="toolbar">
         <button class="btn" id="dl-json">💾 バックアップを書き出す（.json）</button>
         <label class="btn ghost" style="margin:0">📂 バックアップを読み込む
@@ -495,7 +511,7 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
       </div>
       <div class="hint">
         <strong>【学年主任・学年取りまとめ運用フロー】</strong><br>
-        ① 学年主任が「1. 日程・枠の設定」で学校名・学年・面談日程を作成。<br>
+        ① 学年主任が「1. 日程・枠の設定」で学校名・学年・面談日程を作成（空けておきたい枠は🔒で休止設定）。<br>
         ② 「💾 バックアップを書き出す」でJSONファイルを保存し、各担任へ配布。<br>
         ③ 各担任が各自のPCで「2. 生徒・希望の入力」「3. 割り当て表」を行ってJSON書き出し。<br>
         ④ 学年主任が自身の画面で「🧩 各担任のデータを合体（マージ）」で各クラスのJSONを順次読み込むと、学年全体データが完成します。
@@ -542,6 +558,7 @@ const DEFAULT_STATE={
   students:[]
 };
 
+/* v11データ完全互換マイグレーション */
 function migrate(s){
   if(!s) return JSON.parse(JSON.stringify(DEFAULT_STATE));
   if(!Array.isArray(s.classes)) s.classes=[];
@@ -549,6 +566,15 @@ function migrate(s){
   if(!Array.isArray(s.students)) s.students=[];
   if(!s.meta) s.meta={school:"",grade:"",place:"",titleType:"教育相談（三者面談）",note:""};
   if(!s.meta.titleType) s.meta.titleType="教育相談（三者面談）";
+
+  /* コマの blocked フラグを補完 */
+  s.days.forEach(d=>{
+    if(!Array.isArray(d.slots)) d.slots=[];
+    d.slots.forEach(sl=>{
+      if(sl.blocked==null) sl.blocked=false;
+    });
+  });
+
   s.students.forEach(st=>{
     if(!Array.isArray(st.ngDates))st.ngDates=[];
     if(!Array.isArray(st.ngSlots))st.ngSlots=[];
@@ -584,7 +610,10 @@ function slotById(id){for(const d of state.days)for(const s of d.slots)if(s.id==
 function toISODate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
 function dayLabel(date){if(!date)return "";const dt=new Date(date+"T00:00");const m=dt.getMonth()+1,day=dt.getDate();return `${m}/${day}`;}
 function dayWd(date){if(!date)return "";return WD[new Date(date+"T00:00").getDay()];}
-function slotLabel(s){if(!s)return "未定";return `${dayLabel(s.date)}(${dayWd(s.date)}) ${s.start}${s.end?"〜"+s.end:""}`;}
+function slotLabel(s){
+  if(!s)return "未定";
+  return `${dayLabel(s.date)}(${dayWd(s.date)}) ${s.start}${s.end?"〜"+s.end:""}${s.blocked?" [休止]":""}`;
+}
 function displayMode(id){const e=$(id);return e?e.value:"name";}
 function personLabel(s,mode){
   const no=(s.no||"—")+"番";
@@ -647,8 +676,9 @@ function fillMeta(){
   if($("#m-title-type")) $("#m-title-type").value=state.meta.titleType||"教育相談（三者面談）";
 }
 function renderMetaLive(){
-  const sl=allSlots().length, asg=state.students.filter(s=>s.assigned).length;
-  $("#metaLive").innerHTML=`クラス <b>${state.classes.length}</b> ・ 枠 <b>${sl}</b> ・ 割当済 <b>${asg}/${state.students.length}</b>`;
+  const allS=allSlots(), asg=state.students.filter(s=>s.assigned).length;
+  const blockedN=allS.filter(s=>s.blocked).length;
+  $("#metaLive").innerHTML=`クラス <b>${state.classes.length}</b> ・ 枠 <b>${allS.length}${blockedN?` (休止${blockedN})`:""}</b> ・ 割当済 <b>${asg}/${state.students.length}</b>`;
 }
 
 /* ============ CLASSES ============ */
@@ -663,7 +693,7 @@ function renderClasses(){
   state.classes.forEach(c=>{
     const p=el("span","slot-pill");
     p.innerHTML=`<span>${escHTML(c.name)}</span>`;
-    const x=el("button","x");x.textContent="×";x.title="削除";
+    const x=el("button","btn-pill x");x.textContent="×";x.title="削除";
     x.onclick=()=>{
       if(studentsOf(c.id).length && !confirm(c.name+" を削除します。所属する生徒も削除されます。よろしいですか？"))return;
       state.classes=state.classes.filter(k=>k.id!==c.id);
@@ -698,7 +728,7 @@ function addPresetFiveWeekdays(startDate){
       let day=state.days.find(x=>x.date===iso);
       if(!day){day={id:uid(),date:iso,slots:[]};state.days.push(day);}
       starts.forEach(st=>{
-        if(!day.slots.some(s=>s.start===st))day.slots.push({id:uid(),start:st,end:addMinutes(st,30)});
+        if(!day.slots.some(s=>s.start===st))day.slots.push({id:uid(),start:st,end:addMinutes(st,30),blocked:false});
       });
       day.slots.sort((a,b)=>a.start.localeCompare(b.start));
       added++;
@@ -728,13 +758,13 @@ $("#copy-first-day").addEventListener("click",()=>{
     if(i===0)return;
     const oldIds=d.slots.map(s=>s.id);
     state.students.forEach(st=>{if(oldIds.includes(st.assigned))st.assigned=""; st.ngSlots=(st.ngSlots||[]).filter(id=>!oldIds.includes(id));});
-    d.slots=src.slots.map(s=>({id:uid(),start:s.start,end:s.end}));
+    d.slots=src.slots.map(s=>({id:uid(),start:s.start,end:s.end,blocked:!!s.blocked}));
   });
   save();renderAll();
 });
 function buildSlots(start,len,gap,cnt){
   const slots=[];let t=start;
-  for(let i=0;i<cnt;i++){const e=addMinutes(t,len);slots.push({id:uid(),start:t,end:e});t=addMinutes(e,gap);}return slots;
+  for(let i=0;i<cnt;i++){const e=addMinutes(t,len);slots.push({id:uid(),start:t,end:e,blocked:false});t=addMinutes(e,gap);}return slots;
 }
 function bulkCreateDays(startDate,n,start,len,gap,cnt,overwrite){
   let d=new Date(startDate+"T00:00");let added=0,guard=0;
@@ -761,7 +791,8 @@ function bulkCreateDays(startDate,n,start,len,gap,cnt,overwrite){
 }
 function renderDays(){
   const box=$("#days-list");box.innerHTML="";
-  $("#slot-count").textContent="時間枠 合計 "+allSlots().length+" コマ";
+  const allS=allSlots();
+  $("#slot-count").textContent="時間枠 合計 "+allS.length+" コマ";
   if(!state.days.length){box.innerHTML='<div class="empty-state">面談日を追加してください。</div>';return;}
   state.days.forEach(day=>{
     const wrap=el("div","day-block");
@@ -773,7 +804,7 @@ function renderDays(){
     one.onclick=()=>{
       const last=day.slots[day.slots.length-1];
       const start=last?last.end||last.start:"15:30";
-      day.slots.push({id:uid(),start,end:addMinutes(start,25)});save();renderDays();renderMetaLive();
+      day.slots.push({id:uid(),start,end:addMinutes(start,25),blocked:false});save();renderDays();renderMetaLive();
     };
     const del=el("button","btn sm danger");del.textContent="この日を削除";
     del.onclick=()=>{
@@ -789,9 +820,17 @@ function renderDays(){
     const row=el("div","slot-row");
     if(!day.slots.length){row.innerHTML='<span class="chip">枠なし</span>';}
     day.slots.forEach(s=>{
-      const pill=el("span","slot-pill");
+      const pill=el("span","slot-pill"+(s.blocked?" blocked":""));
       pill.innerHTML=`<span>${s.start}${s.end?"〜"+s.end:""}</span>`;
-      const x=el("button","x");x.textContent="×";
+
+      /* 休止（ブロック）トグルボタン */
+      const bLock=el("button","btn-pill");
+      bLock.innerHTML=s.blocked?"🔒<small>休止</small>":"🔓";
+      bLock.title=s.blocked?"面談枠として再開する":"この枠を休止・空け枠にする";
+      bLock.onclick=()=>toggleBlockSlot(s.id);
+      pill.appendChild(bLock);
+
+      const x=el("button","btn-pill x");x.textContent="×";x.title="枠を削除";
       x.onclick=()=>{
         if(state.students.some(st=>st.assigned===s.id)) state.students.forEach(st=>{if(st.assigned===s.id)st.assigned="";});
         day.slots=day.slots.filter(k=>k.id!==s.id);save();renderDays();renderMetaLive();
@@ -1026,7 +1065,7 @@ function renderUnavailGrid(){
   });
 })();
 
-/* ============ AUTO ASSIGN (MRV + Backtracking) ============ */
+/* ============ AUTO ASSIGN (休止枠除外 + MRV) ============ */
 $("#asg-auto").addEventListener("click",autoAssign);
 $("#asg-clear").addEventListener("click",()=>{
   const cid=$("#asg-class").value;
@@ -1035,10 +1074,11 @@ $("#asg-clear").addEventListener("click",()=>{
 
 function autoAssign(){
   const cid=$("#asg-class").value;if(!cid)return;
-  const allS=allSlots();
+  /* 休止枠（blocked===true）は自動割り当て候補から完全に除外 */
+  const allS=allSlots().filter(sl=>!sl.blocked);
   const list=studentsOf(cid);
   if(!list.length){alert("生徒が登録されていません。");return;}
-  if(!allS.length){alert("時間枠が登録されていません。");return;}
+  if(!allS.length){alert("有効な面談時間枠がありません。（休止中になっていないか確認してください）");return;}
 
   const domains=new Map();
   list.forEach(st=>{
@@ -1110,10 +1150,39 @@ function renderRoster(){
     const sib=siblingLabel(s);
     c.innerHTML=`<span class="badge">${escHTML(s.no||"—")}</span><span class="rname">${mode==="no"?"":escHTML(s.name||"氏名未入力")}</span>${sib?`<span class="sibling-badge">${escHTML(sib)}</span>`:""}`;
     c.title=`❌：${ngSummary(s)}${sib?"\n兄弟関係："+sib:""}${s.note?"\n備考："+s.note:""}${s.assigned?"\n割当済："+slotLabel(slotById(s.assigned)):"\nドラッグして時間枠へ"}`;
-    c.addEventListener("dragstart",ev=>{ev.dataTransfer.setData("text/student-id",s.id);ev.dataTransfer.effectAllowed="move";});
+    c.addEventListener("dragstart",ev=>{
+      ev.dataTransfer.setData("text/student-id",s.id);
+      ev.dataTransfer.setData("text/source-slot","");
+      ev.dataTransfer.setData("text/plain",s.id);
+      ev.dataTransfer.effectAllowed="move";
+    });
     box.appendChild(c);
   });
 }
+
+/* 名簿エリアへのドロップで割り当て解除 */
+(function setupRosterDropzone(){
+  const p=$("#roster-panel");
+  if(!p)return;
+  p.addEventListener("dragover",ev=>{
+    ev.preventDefault();
+    p.classList.add("drag-over");
+    ev.dataTransfer.dropEffect="move";
+  });
+  p.addEventListener("dragleave",()=>p.classList.remove("drag-over"));
+  p.addEventListener("drop",ev=>{
+    ev.preventDefault();
+    p.classList.remove("drag-over");
+    const sid=ev.dataTransfer.getData("text/student-id")||ev.dataTransfer.getData("text/plain");
+    if(sid){
+      const st=state.students.find(x=>x.id===sid);
+      if(st && st.assigned){
+        st.assigned="";
+        save();renderAssign();
+      }
+    }
+  });
+})();
 
 function studentByNo(cid,no){
   const n=String(no||"").trim().replace(/[０-９]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0));
@@ -1121,25 +1190,72 @@ function studentByNo(cid,no){
   return studentsOf(cid).find(s=>String(s.no||"").trim()===n)||null;
 }
 
-function assignStudentToSlot(studentId,slotId){
+/* 日程表上での割り当て・入れ替え（スワップ）・移動 */
+function handleSlotDrop(studentId, targetSlotId, sourceSlotId){
   const st=state.students.find(s=>s.id===studentId);
-  const sl=slotById(slotId);
-  if(!st||!sl)return;
-  if(isNgSlot(st,sl)){
-    if(!confirm(`${personLabel(st,"name")} は ${dayLabel(sl.date)}(${dayWd(sl.date)}) が❌になっています。この枠に入れますか？`))return;
+  const targetSlot=slotById(targetSlotId);
+  if(!st||!targetSlot)return;
+
+  if(targetSlot.blocked){
+    if(!confirm("この枠は現在【休止・空け枠】に設定されています。休止を解除して割り当てますか？")) return;
+    targetSlot.blocked=false;
+    const realSlot=findRealSlot(targetSlotId);
+    if(realSlot) realSlot.blocked=false;
   }
 
-  const currentOccupant=state.students.find(s=>s.classId===st.classId && s.assigned===slotId && s.id!==studentId);
-  if(currentOccupant){
-    currentOccupant.assigned=st.assigned||"";
+  if(sourceSlotId && sourceSlotId===targetSlotId) return;
+
+  if(isNgSlot(st,targetSlot)){
+    if(!confirm(`${personLabel(st,"name")} は ${dayLabel(targetSlot.date)}(${dayWd(targetSlot.date)}) が❌になっています。この枠に入れますか？`))return;
   }
-  st.assigned=slotId;
+
+  /* ドロップ先に既にいる生徒 */
+  const occupant=state.students.find(s=>s.classId===st.classId && s.assigned===targetSlotId && s.id!==studentId);
+
+  if(occupant){
+    if(sourceSlotId){
+      /* マス同士の入れ替え（スワップ） */
+      const sourceSlot=slotById(sourceSlotId);
+      if(isNgSlot(occupant,sourceSlot)){
+        if(!confirm(`入れ替えると、${personLabel(occupant,"name")} が不可日時❌（${dayLabel(sourceSlot.date)}）に入ることになります。入れ替えますか？`)) return;
+      }
+      occupant.assigned=sourceSlotId;
+      st.assigned=targetSlotId;
+    }else{
+      /* 名簿から既存マスへドロップ：入れ替えて既存生徒を名簿へ戻す */
+      occupant.assigned="";
+      st.assigned=targetSlotId;
+    }
+  } else {
+    /* 空きマスへの単なる移動 */
+    st.assigned=targetSlotId;
+  }
+
   save();renderAssign();
+}
+
+function findRealSlot(id){
+  for(const d of state.days)for(const s of d.slots)if(s.id===id)return s;
+  return null;
 }
 
 function clearSlotForClass(cid,slotId){
   studentsOf(cid).forEach(s=>{if(s.assigned===slotId)s.assigned="";});
   save();renderAssign();
+}
+
+/* 休止の切り替え。割り当て済みの生徒がいる場合は、外すことに同意したときだけ休止にする
+   （同意しないまま休止にすると、その生徒が割り当て表から見えなくなるため） */
+function toggleBlockSlot(slotId){
+  const sl=findRealSlot(slotId);
+  if(!sl)return;
+  if(!sl.blocked){
+    const asg=state.students.filter(s=>s.assigned===slotId);
+    if(asg.length && !confirm(`この枠には ${asg.map(s=>(s.no||"—")+"番").join("、")} が割り当てられています。割り当てを外して休止にします。よろしいですか？`))return;
+    asg.forEach(s=>s.assigned="");
+  }
+  sl.blocked=!sl.blocked;
+  save();renderAssign();renderDays();renderMetaLive();
 }
 
 function renderAssign(){
@@ -1160,22 +1276,51 @@ function renderAssign(){
   state.days.forEach(d=>head+=`<th>${dayLabel(d.date)}(${dayWd(d.date)})</th>`);
   head+="</tr></thead>";
   let body="<tbody>";
+
   times.forEach(tm=>{
     body+=`<tr><td class="tcol">${tm}</td>`;
     state.days.forEach(d=>{
       const sl=d.slots.find(x=>x.start===tm);
       if(!sl){body+='<td class="cell" style="background:repeating-linear-gradient(45deg,#f4f0e6,#f4f0e6 5px,#fbf8f1 5px,#fbf8f1 10px)"></td>';return;}
+
       const ps=peopleBySlot[sl.id]||[];
+      const isBlocked=!!sl.blocked;
       const hasNg=ps.some(st=>isNgSlot(st,sl));
-      const clsName=ps.length>1?"conflict":(hasNg?"ng":(ps.length===1?"filled":"empty"));
+      /* 休止枠でも生徒が残っている場合は、生徒を隠さず警告として表示する */
+      let clsName;
+      if(!ps.length) clsName=isBlocked?"blocked-cell":"empty";
+      else if(ps.length>1) clsName="conflict";
+      else if(isBlocked||hasNg) clsName="ng";
+      else clsName="filled";
       const inputVal=ps.length===1?(ps[0].no||""):"";
-      const names=ps.length?ps.map(s=>escHTML(personLabel(s,mode))).join("／"):"空き";
       const sibTxt=ps.map(s=>siblingLabel(s)).filter(Boolean).map(escHTML).join("／");
       const ngTxt=hasNg?"❌の日":"";
+
+      /* セル内容生成 */
+      let studentHTML="";
+      if(isBlocked && !ps.length){
+        studentHTML=`<div class="cell-block-msg"><span>🔒 休止枠</span></div>`;
+      } else if(ps.length){
+        studentHTML=(isBlocked?`<span class="cell-blocked-warn">🔒 休止枠に割り当て</span>`:"")+ps.map(s=>`
+          <div class="cell-student-box" draggable="true" data-drag-sid="${s.id}" data-drag-from="${sl.id}" title="ドラッグして他のマスへ移動・入れ替え、名簿へ戻して解除">
+            <span class="cell-person">${escHTML(personLabel(s,mode))}</span>
+            ${ngTxt?`<span class="cell-sub">${ngTxt}</span>`:""}
+            ${sibTxt?`<span class="sibling-badge">${sibTxt}</span>`:""}
+          </div>
+        `).join("");
+      } else {
+        studentHTML=`<span class="cell-sub" style="margin-top:.4rem">空き</span>`;
+      }
+
       body+=`<td class="cell dropzone ${clsName}" data-slot="${sl.id}">
-        <button class="clear-cell no-print" data-clear-slot="${sl.id}" title="この枠を空にする">×</button>
-        <input class="slot-input no-print" data-slot-input="${sl.id}" value="${escHTML(inputVal)}" placeholder="番" inputmode="numeric" title="出席番号を入力">
-        <span class="cell-person">${names}</span>${ngTxt?`<span class="cell-sub">${ngTxt}</span>`:""}${sibTxt?`<span class="sibling-badge">${sibTxt}</span>`:""}
+        <div class="cell-controls no-print">
+          <input class="slot-input" data-slot-input="${sl.id}" value="${escHTML(inputVal)}" placeholder="番" inputmode="numeric" title="出席番号を入力してEnter" ${(isBlocked&&!ps.length)?"disabled":""}>
+          <div class="cell-actions">
+            <button class="btn-cell-act" data-toggle-block="${sl.id}" title="${isBlocked?'休止を解除して面談枠にする':'この枠を休止・空け枠にする'}">${isBlocked?'🔓':'🔒'}</button>
+            ${ps.length?`<button class="btn-cell-act" data-clear-slot="${sl.id}" title="この枠を空にする" style="color:var(--warn);font-weight:900">×</button>`:""}
+          </div>
+        </div>
+        ${studentHTML}
       </td>`;
     });
     body+="</tr>";
@@ -1183,37 +1328,66 @@ function renderAssign(){
   body+="</tbody>";
   grid.innerHTML=head+body;
 
+  /* ドロップゾーン処理（マス） */
   grid.querySelectorAll(".dropzone").forEach(cell=>{
-    cell.addEventListener("dragover",ev=>{ev.preventDefault();cell.classList.add("drag-over");ev.dataTransfer.dropEffect="move";});
+    cell.addEventListener("dragover",ev=>{
+      ev.preventDefault();
+      cell.classList.add("drag-over");
+      ev.dataTransfer.dropEffect="move";
+    });
     cell.addEventListener("dragleave",()=>cell.classList.remove("drag-over"));
     cell.addEventListener("drop",ev=>{
-      ev.preventDefault();cell.classList.remove("drag-over");
+      ev.preventDefault();
+      cell.classList.remove("drag-over");
       const sid=ev.dataTransfer.getData("text/student-id")||ev.dataTransfer.getData("text/plain");
-      if(sid)assignStudentToSlot(sid,cell.dataset.slot);
+      const fromSlot=ev.dataTransfer.getData("text/source-slot");
+      if(sid) handleSlotDrop(sid, cell.dataset.slot, fromSlot);
     });
   });
+
+  /* マス内生徒のドラッグ開始処理 */
+  grid.querySelectorAll("[data-drag-sid]").forEach(item=>{
+    item.addEventListener("dragstart",ev=>{
+      ev.dataTransfer.setData("text/student-id", item.dataset.dragSid);
+      ev.dataTransfer.setData("text/source-slot", item.dataset.dragFrom);
+      ev.dataTransfer.setData("text/plain", item.dataset.dragSid);
+      ev.dataTransfer.effectAllowed="move";
+    });
+  });
+
+  /* 番号入力 */
   grid.querySelectorAll("[data-slot-input]").forEach(inp=>{
     const apply=()=>{
       const st=studentByNo(cid,inp.value);
       if(!String(inp.value||"").trim()){clearSlotForClass(cid,inp.dataset.slot);return;}
       if(!st){alert("その出席番号の生徒が名簿にいません。");inp.value="";return;}
-      assignStudentToSlot(st.id,inp.dataset.slot);
+      handleSlotDrop(st.id, inp.dataset.slot, "");
     };
     inp.addEventListener("change",apply);
     inp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();apply();}});
   });
-  grid.querySelectorAll("[data-clear-slot]").forEach(b=>b.onclick=()=>clearSlotForClass(cid,b.dataset.clearSlot));
 
+  grid.querySelectorAll("[data-clear-slot]").forEach(b=>b.onclick=()=>clearSlotForClass(cid,b.dataset.clearSlot));
+  grid.querySelectorAll("[data-toggle-block]").forEach(b=>b.onclick=()=>toggleBlockSlot(b.dataset.toggleBlock));
+
+  /* 個別割り当てテーブル */
   const at=$("#asg-tbl");
   const personHead=mode==="no"?"<th>出席番号</th>":"<th>番号</th><th>氏名</th>";
   let rows=`<thead><tr>${personHead}<th>条件・備考</th><th>割り当て</th><th>状態</th></tr></thead><tbody>`;
+  let blockedAsg=0;
   list.forEach(s=>{
     const sib=siblingLabel(s);
     const cond=`❌ ${escHTML(ngSummary(s))}${sib?"<br>兄弟関係："+escHTML(sib):""}`;
     const sl=s.assigned?slotById(s.assigned):null;
     const conflict=s.assigned && cnt[s.assigned]>1;
     const ng=sl&&isNgSlot(s,sl);
-    const st=!s.assigned?'<span class="chip wait">未割当</span>':conflict?'<span class="chip bad">重複</span>':ng?'<span class="chip bad">❌日</span>':'<span class="chip ok">確定</span>';
+    const blk=!!(sl&&sl.blocked);
+    if(blk)blockedAsg++;
+    const st=!s.assigned?'<span class="chip wait">未割当</span>'
+      :conflict?'<span class="chip bad">重複</span>'
+      :blk?'<span class="chip bad">休止枠</span>'
+      :ng?'<span class="chip bad">❌日</span>'
+      :'<span class="chip ok">確定</span>';
     const personCells=mode==="no"?`<td>${escHTML(s.no)}</td>`:`<td>${escHTML(s.no)}</td><td>${escHTML(s.name)}</td>`;
     rows+=`<tr data-id="${s.id}">${personCells}<td style="font-size:.78rem;color:var(--muted)">${cond}</td>
       <td><select data-asg>${assignOptions(s,cnt)}</select></td><td>${st}</td></tr>`;
@@ -1229,8 +1403,8 @@ function renderAssign(){
 
   const asgN=list.filter(s=>s.assigned).length;
   const conf=Object.values(cnt).filter(c=>c>1).length;
-  $("#asg-status").textContent=`割当 ${asgN}/${list.length}` + (conf?` ・ 重複 ${conf}枠`:"");
-  $("#asg-status").className="chip "+(conf?"bad":(asgN===list.length&&list.length?"ok":"wait"));
+  $("#asg-status").textContent=`割当 ${asgN}/${list.length}`+(conf?` ・ 重複 ${conf}枠`:"")+(blockedAsg?` ・ 休止枠に ${blockedAsg}名`:"");
+  $("#asg-status").className="chip "+((conf||blockedAsg)?"bad":(asgN===list.length&&list.length?"ok":"wait"));
   renderRoster();
 }
 
@@ -1239,8 +1413,10 @@ function assignOptions(s,cnt){
   state.days.forEach(d=>d.slots.forEach(sl=>{
     const taken=(cnt[sl.id]||0)>0 && s.assigned!==sl.id;
     const ng=isNgDate(s,d.date);
-    const label=`${dayLabel(d.date)}(${dayWd(d.date)}) ${sl.start}${ng?" ❌":""}${taken?"（使用中）":""}`;
-    o+=`<option value="${sl.id}" ${sl.id===s.assigned?"selected":""} ${ng?"style='color:#c0392b;font-weight:700'":""}>${label}</option>`;
+    const isBlk=!!sl.blocked;
+    const label=`${dayLabel(d.date)}(${dayWd(d.date)}) ${sl.start}${isBlk?" [休止]":""}${ng?" ❌":""}${taken?"（使用中）":""}`;
+    const style=ng?"color:#c0392b;font-weight:700":(isBlk?"color:#888":"");
+    o+=`<option value="${sl.id}" ${sl.id===s.assigned?"selected":""} ${style?`style="${style}"`:""}>${label}</option>`;
   }));
   return o;
 }
@@ -1361,7 +1537,7 @@ $("#up-json").addEventListener("change",e=>{
   const r=new FileReader();
   r.onload=()=>{try{const d=JSON.parse(r.result);
     if(!d.classes||!d.days||!d.students)throw 0;
-    state=migrate(d);save();renderAll();alert("全データを読み込みました。");
+    state=migrate(d);save();renderAll();alert("全データを読み込みました。（v11のバックアップもそのまま引き継がれます）");
   }catch(err){alert("読み込めませんでした。正しいバックアップファイルか確認してください。");}};
   r.readAsText(f);e.target.value="";
 });
@@ -1402,7 +1578,7 @@ $("#dl-csv").addEventListener("click",()=>{
     studentsOf(c.id).sort((a,b)=>(parseInt(a.no)||0)-(parseInt(b.no)||0)).forEach(s=>{
       const sl=s.assigned?slotById(s.assigned):null;
       const ng=sl&&isNgSlot(s,sl);
-      const st=!s.assigned?"未割当":(cnt[s.assigned]>1?"重複":(ng?"❌日":"確定"));
+      const st=!s.assigned?"未割当":(cnt[s.assigned]>1?"重複":(sl&&sl.blocked?"休止枠":(ng?"❌日":"確定")));
       rows.push([c.name,s.no||"",s.name||"",sl?dayLabel(sl.date):"",sl?dayWd(sl.date):"",sl?sl.start:"",sl&&sl.end?sl.end:"",st,ngSummary(s),siblingLabel(s),s.note||""]);
     });
   });
@@ -1421,10 +1597,12 @@ function downloadBlob(blob,name){
 }
 function renderSummary(){
   const asg=state.students.filter(s=>s.assigned).length;
+  const blockedN=allSlots().filter(s=>s.blocked).length;
   $("#data-summary").innerHTML=`<div class="legend" style="margin-top:.8rem">
     <span class="chip">クラス ${state.classes.length}</span>
     <span class="chip">面談日 ${state.days.length}日</span>
     <span class="chip">時間枠 ${allSlots().length}コマ</span>
+    ${blockedN?`<span class="chip blocked">休止枠 ${blockedN}コマ</span>`:""}
     <span class="chip">生徒 ${state.students.length}名</span>
     <span class="chip ok">割当済 ${asg}名</span>
     <span class="chip wait">未割当 ${state.students.length-asg}名</span>
