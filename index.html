@@ -252,7 +252,7 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
 .slip .teacher-note-list li::marker{color:var(--board);font-weight:900}
 
 /* PRINT STYLES */
-.print-only{display:none}
+.print-only,.print-legend,.cell-flag{display:none}
 @page{size:A4;margin:12mm}
 @media print{
   html,body{width:100%;margin:0!important;padding:0!important;background:#fff!important}
@@ -260,29 +260,38 @@ td input:focus,td select:focus{border-color:var(--board);background:#fff;outline
   .topbar,.tabs,.no-print,.roster-panel,.quick-tools,.drop-hint,#asg-tbl,#panel-assign .card:nth-of-type(2),.modal-backdrop,.import-box,.bulk-box{display:none!important}
   main{max-width:none!important;width:100%!important;padding:0!important;margin:0!important}
   .panel{display:none!important}
-  .panel.print-active{display:block!important}
+  .panel.print-active{display:block!important;animation:none!important}
   .card{box-shadow:none!important;border:none!important;padding:0!important;margin:0!important;background:#fff!important}
   .print-only{display:block!important}
   .tbl-wrap{border:none!important;overflow:visible!important;padding-bottom:0!important}
 
-  /* 割り当て表 (A4横) */
-  body.print-assign #asg-print-head{display:block!important;margin:0 0 4mm!important}
-  body.print-assign #asg-print-head .print-headline{font-size:14pt!important;font-weight:800!important;margin:0 0 1mm!important}
-  body.print-assign #asg-print-head .print-subline{font-size:8.5pt!important;color:#333!important}
+  /* 割り当て表 (A4横・モノクロ印刷対応) — 色に頼らず罫線・濃淡・文字で区別する */
+  body.print-assign .builder-panel > h3,body.print-assign .legend,body.print-assign #panel-assign .card > h2,body.print-assign #panel-assign .card > .lead,body.print-assign #panel-assign .toolbar{display:none!important}
+  body.print-assign #asg-print-head{display:flex!important;align-items:flex-end;justify-content:space-between;gap:6mm;margin:0 0 3mm!important;padding-bottom:1.5mm;border-bottom:1.6pt solid #000}
+  body.print-assign #asg-print-head .print-headline{font-size:15pt!important;font-weight:800!important;margin:0!important;color:#000!important}
+  body.print-assign #asg-print-head .print-subline{font-size:9pt!important;color:#000!important;margin:1mm 0 0!important}
+  body.print-assign #asg-print-head .print-legend{display:flex!important;gap:4mm;font-size:8pt;color:#000;white-space:nowrap}
+  body.print-assign #asg-print-head .print-legend i{display:inline-block;width:5mm;height:3.4mm;border:0.6pt solid #000;vertical-align:-0.6mm;margin-right:1mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body.print-assign .builder,body.print-assign .builder-panel{display:block!important;width:100%!important}
-  body.print-assign .sgrid{table-layout:fixed;width:100%!important;border-collapse:collapse!important;font-size:8.2pt!important;border:1.2pt solid #444!important}
-  body.print-assign .sgrid th,body.print-assign .sgrid td{padding:1.4mm 1mm!important;border:0.6pt solid #666!important;text-align:center!important;vertical-align:middle!important}
-  body.print-assign .sgrid thead th{background:#f0f0f0!important;color:#000!important;font-weight:800!important}
-  body.print-assign .sgrid .tcol{width:16mm!important;background:#f0f0f0!important;color:#000!important;font-weight:700!important}
-  body.print-assign .sgrid .cell{height:11.5mm!important;min-width:0!important;background:#fff!important;color:#000!important}
-  body.print-assign .sgrid .cell.filled{background:#eef6f0!important}
-  body.print-assign .sgrid .cell.conflict,body.print-assign .sgrid .cell.ng{background:#fdebea!important}
-  body.print-assign .sgrid .cell.blocked-cell{background:#e8e8e8!important;color:#666!important}
+  body.print-assign .sgrid{table-layout:fixed;width:100%!important;border-collapse:collapse!important;font-size:9pt!important;border:1.6pt solid #000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.print-assign .sgrid tr{break-inside:avoid;page-break-inside:avoid}
+  body.print-assign .sgrid th,body.print-assign .sgrid td{padding:1.2mm 1mm!important;border:0.8pt solid #000!important;text-align:center!important;vertical-align:middle!important;color:#000!important}
+  body.print-assign .sgrid thead th{background:#d4d4d4!important;font-size:10.5pt!important;font-weight:800!important;border-bottom:1.6pt solid #000!important;padding:1.6mm 1mm!important}
+  body.print-assign .sgrid .tcol{width:17mm!important;background:#d4d4d4!important;font-size:10pt!important;font-weight:800!important;border-right:1.6pt solid #000!important}
+  body.print-assign .sgrid .cell{height:12mm!important;min-width:0!important;background:#fff!important;border-width:0.8pt!important}
+  body.print-assign .sgrid :where(tbody tr:nth-child(even)) .cell{background:#efefef!important}
+  body.print-assign .sgrid .cell.empty .cell-sub{display:none!important}
+  body.print-assign .sgrid .cell.noslot{background:#fff linear-gradient(to top right,transparent calc(50% - .4pt),#000 50%,transparent calc(50% + .4pt))!important}
+  body.print-assign .sgrid .cell.blocked-cell{background:#bdbdbd!important}
+  body.print-assign .sgrid .cell.conflict,body.print-assign .sgrid .cell.ng{background:#fff!important;outline:1.8pt solid #000;outline-offset:-2.2pt}
   body.print-assign .sgrid .cell .slot-input,body.print-assign .sgrid .cell .clear-cell,body.print-assign .sgrid .cell .cell-controls{display:none!important}
-  body.print-assign .sgrid .cell-person{font-size:8pt!important;line-height:1.15!important;margin:0!important;display:block!important;font-weight:800!important}
-  body.print-assign .sgrid .cell-sub{font-size:6.5pt!important;margin:0!important;color:#444!important}
-  body.print-assign .sgrid .cell-blocked-warn{font-size:6.5pt!important;color:#000!important;margin:0!important}
-  body.print-assign .sibling-badge{border:0!important;background:transparent!important;color:#111!important;font-size:6.8pt!important;padding:0!important;margin-top:.3mm!important;display:block!important}
+  body.print-assign .sgrid .cell-student-box{padding:0!important}
+  body.print-assign .sgrid .cell-student-box + .cell-student-box{border-top:0.4pt dashed #000;margin-top:.6mm!important;padding-top:.6mm!important}
+  body.print-assign .sgrid .cell-person{font-size:10pt!important;line-height:1.2!important;margin:0!important;display:block!important;font-weight:800!important;color:#000!important}
+  body.print-assign .sgrid .cell-sub,body.print-assign .sgrid .cell-blocked-warn,body.print-assign .sgrid .cell-flag{display:block!important;font-size:7.5pt!important;font-weight:800!important;margin:0 0 .3mm!important;color:#000!important}
+  body.print-assign .sgrid .cell-block-msg{font-size:9pt!important;font-weight:800!important;color:#000!important;padding:0!important;letter-spacing:.3em}
+  body.print-assign .sgrid .ico{display:none!important}
+  body.print-assign .sibling-badge{border:0!important;background:transparent!important;color:#000!important;font-size:7.5pt!important;padding:0!important;margin-top:.3mm!important;display:block!important}
 
   /* お知らせカード (A4縦 3分割) */
   body.print-notify #panel-notify{width:100%!important}
@@ -1266,7 +1275,7 @@ function renderAssign(){
   const mode=displayMode("#asg-mode");
   const cls=state.classes.find(c=>c.id===cid);
   const titleType=state.meta.titleType||"教育相談（三者面談）";
-  $("#asg-print-head").innerHTML=`<div class="print-headline">${escHTML(state.meta.school||"")} ${escHTML(state.meta.grade||"")} ${escHTML(cls?cls.name:"")} ${escHTML(titleType)} 割り当て一覧</div><div class="print-subline">場所: ${escHTML(state.meta.place||"—")}</div>`;
+  $("#asg-print-head").innerHTML=`<div><div class="print-headline">${escHTML(state.meta.school||"")} ${escHTML(state.meta.grade||"")} ${escHTML(cls?cls.name:"")} ${escHTML(titleType)} 割り当て一覧</div><div class="print-subline">場所: ${escHTML(state.meta.place||"—")}</div></div><div class="print-legend"><span><i style="background:#fff"></i>空き</span><span><i style="background:#bdbdbd"></i>休止枠</span><span><i style="background:#fff linear-gradient(to top right,transparent 46%,#000 50%,transparent 54%)"></i>枠なし</span><span><i style="background:#fff;outline:1.2pt solid #000;outline-offset:-2pt"></i>要確認</span></div>`;
 
   const cnt={};list.forEach(s=>{if(s.assigned)cnt[s.assigned]=(cnt[s.assigned]||0)+1;});
   const peopleBySlot={};list.forEach(s=>{if(s.assigned){(peopleBySlot[s.assigned]||(peopleBySlot[s.assigned]=[])).push(s);}});
@@ -1281,7 +1290,7 @@ function renderAssign(){
     body+=`<tr><td class="tcol">${tm}</td>`;
     state.days.forEach(d=>{
       const sl=d.slots.find(x=>x.start===tm);
-      if(!sl){body+='<td class="cell" style="background:repeating-linear-gradient(45deg,#f4f0e6,#f4f0e6 5px,#fbf8f1 5px,#fbf8f1 10px)"></td>';return;}
+      if(!sl){body+='<td class="cell noslot" style="background:repeating-linear-gradient(45deg,#f4f0e6,#f4f0e6 5px,#fbf8f1 5px,#fbf8f1 10px)"></td>';return;}
 
       const ps=peopleBySlot[sl.id]||[];
       const isBlocked=!!sl.blocked;
@@ -1295,16 +1304,17 @@ function renderAssign(){
       const inputVal=ps.length===1?(ps[0].no||""):"";
       const sibTxt=ps.map(s=>siblingLabel(s)).filter(Boolean).map(escHTML).join("／");
       const ngTxt=hasNg?"❌の日":"";
+      const conflictFlag=ps.length>1?`<span class="cell-flag">※重複（${ps.length}名）</span>`:"";
 
       /* セル内容生成 */
       let studentHTML="";
       if(isBlocked && !ps.length){
-        studentHTML=`<div class="cell-block-msg"><span>🔒 休止枠</span></div>`;
+        studentHTML=`<div class="cell-block-msg"><span><span class="ico">🔒 </span>休止枠</span></div>`;
       } else if(ps.length){
-        studentHTML=(isBlocked?`<span class="cell-blocked-warn">🔒 休止枠に割り当て</span>`:"")+ps.map(s=>`
+        studentHTML=conflictFlag+(isBlocked?`<span class="cell-blocked-warn"><span class="ico">🔒 </span>※休止枠に割り当て</span>`:"")+ps.map(s=>`
           <div class="cell-student-box" draggable="true" data-drag-sid="${s.id}" data-drag-from="${sl.id}" title="ドラッグして他のマスへ移動・入れ替え、名簿へ戻して解除">
             <span class="cell-person">${escHTML(personLabel(s,mode))}</span>
-            ${ngTxt?`<span class="cell-sub">${ngTxt}</span>`:""}
+            ${ngTxt?`<span class="cell-sub"><span class="ico">❌の日</span><span class="cell-flag">※参加不可の日</span></span>`:""}
             ${sibTxt?`<span class="sibling-badge">${sibTxt}</span>`:""}
           </div>
         `).join("");
@@ -1427,6 +1437,10 @@ $("#roster-search").addEventListener("input",renderRoster);
 function setPrintMode(mode){
   document.body.classList.remove("print-assign","print-notify");
   if(mode)document.body.classList.add(mode);
+  /* 割り当て一覧はA4横で印刷する */
+  let pg=document.getElementById("print-page-style");
+  if(!pg){pg=document.createElement("style");pg.id="print-page-style";document.head.appendChild(pg);}
+  pg.textContent=mode==="print-assign"?"@page{size:A4 landscape;margin:10mm}":"";
 }
 window.addEventListener("afterprint",()=>setPrintMode(""));
 $("#asg-print").addEventListener("click",()=>{
